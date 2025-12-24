@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- MINIMALIST DESIGN --- */
+        /* --- LAYOUT & CARD --- */
         body {
-            background-color: #fcfcfc;
+            background-color: #f8f9fa;
             font-family: 'Open Sans', sans-serif;
             display: flex;
             justify-content: center;
@@ -19,94 +19,127 @@
         #api {
             background-color: #ffffff;
             width: 100%;
-            max-width: 480px;
-            padding: 45px;
-            border-radius: 4px;
-            border: 1px solid #e6e6e6;
-            box-sizing: border-box;
-        }
-
-        /* LOGO STYLING */
-        .companyLogo {
-            display: block;
-            margin: 0 auto 30px auto;
-            max-width: 250px;
-        }
-
-        /* HEADINGS AND INSTRUCTIONS */
-        h2 { font-weight: 700; color: #333; font-size: 24px; margin-bottom: 15px; }
-        .intro p { color: #4a4a4a; font-size: 15px; line-height: 1.6; margin-bottom: 25px; }
-
-        /* INPUT FIELDS */
-        input {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border: 2px solid #333; /* Darker border from your Image 1 */
+            max-width: 450px;
+            padding: 40px;
             border-radius: 8px;
-            font-size: 16px;
+            border: 1px solid #e1e4e8;
             box-sizing: border-box;
+            text-align: left; /* Fixes right-side indentation */
         }
-        input:focus { border-color: #2e71ca; outline: none; }
 
-        /* ROUNDED BUTTONS */
+        /* --- LOGO --- */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo-container img {
+            max-width: 220px;
+            height: auto;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1, h2, .heading {
+            font-size: 28px;
+            font-weight: 700;
+            color: #000;
+            margin: 0 0 20px 0;
+        }
+        .intro p, .instruction {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* --- FORMS & INPUTS --- */
+        .attrEntry { margin-bottom: 15px; width: 100%; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
+        
+        input {
+            width: 100% !important;
+            padding: 12px !important;
+            border: 1.5px solid #333 !important;
+            border-radius: 8px !important;
+            font-size: 16px !important;
+            box-sizing: border-box !important;
+        }
+
+        /* --- BUTTONS --- */
         button {
-            width: 100%;
-            padding: 16px;
-            background-color: #2e71ca;
-            color: white;
-            border: none;
-            border-radius: 8px; /* Rounded as requested */
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: background 0.2s;
+            width: 100% !important;
+            padding: 14px !important;
+            background-color: #2e71ca !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important; /* Rounded Buttons */
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            margin-top: 15px !important;
+            transition: opacity 0.2s;
         }
-        button:hover { background-color: #245ba3; }
-        button:disabled { background-color: #e0e0e0; color: #999; cursor: not-allowed; }
+        button:hover { opacity: 0.9; }
+        button:disabled { background-color: #ccc !important; cursor: not-allowed; }
 
-        /* --- SPECIFIC UI HIDING --- */
-        
-        /* Hide the initial Continue button on verification screen (Image 2) */
-        #email_ver_but_edit, #cancel, .changeClaims { display: none !important; }
-        
-        /* Ensure the Continue button is hidden while verification is pending */
-        #continue[disabled] { display: none !important; }
+        /* --- SPECIFIC FIXES --- */
 
-        /* Links */
-        #forgotPassword { color: #2e71ca; text-decoration: underline; font-size: 14px; display: block; margin-top: 10px; }
-        .error { color: #d32f2f; font-size: 13px; margin-top: -5px; margin-bottom: 10px; }
+        /* Position Forgot Password Link below Password Box */
+        .forgotPassword {
+            display: block;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        #forgotPassword {
+            color: #2e71ca;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+
+        /* Hide the Continue button in Verification Screen (Img 2) */
+        /* and the Cancel button in success state (Img 3) */
+        #continue[disabled], 
+        #email_ver_but_edit, 
+        .changeClaims, 
+        #cancel { 
+            display: none !important; 
+        }
+
+        /* Reset B2C default list styling that causes right-indentation */
+        ul { padding: 0; margin: 0; list-style: none; }
+        
     </style>
 </head>
 <body>
     <div id="api">
-        <!-- B2C injects content here -->
+        <!-- ABO Logo added manually here to ensure it appears on every screen -->
+        <div class="logo-container">
+            <img src="https://manav-132.github.io/B2C.UI/abo-logo.png" alt="ABO Logo">
+        </div>
+        <div id="api-content"></div>
     </div>
 
     <script>
-        // --- AUTOMATION SCRIPT ---
-        (function() {
-            var observer = new MutationObserver(function(mutations) {
-                // 1. Target the 'Continue' button
-                var continueBtn = document.getElementById('continue');
-                var verMsg = document.querySelector('.verificationSuccess');
-
-                if (continueBtn) {
-                    // Check if verification message is visible (Image 3 state)
-                    if (verMsg && verMsg.style.display !== 'none') {
-                        // AUTO-SKIP Image 3: Clicks continue immediately when verified
-                        continueBtn.click();
-                    }
-                }
-            });
-
-            // Start observing the #api container for changes
-            var target = document.getElementById('api');
-            if (target) {
-                observer.observe(target, { attributes: true, childList: true, subtree: true });
+        // --- AUTOMATION & UI FIXES ---
+        var observer = new MutationObserver(function(mutations) {
+            // 1. AUTO-SKIP "Verified" Screen (Image 3)
+            var continueBtn = document.getElementById('continue');
+            var successMsg = document.querySelector('.verificationSuccess');
+            if (continueBtn && successMsg && successMsg.style.display !== 'none') {
+                continueBtn.click();
             }
-        })();
+
+            // 2. RE-ORDER Forgot Password (ensure it's below password input)
+            var passwordEntry = document.querySelector('.attrEntry:has(input[type="password"])');
+            var forgotLink = document.querySelector('.forgotPassword');
+            if (passwordEntry && forgotLink) {
+                passwordEntry.after(forgotLink);
+            }
+        });
+
+        var target = document.getElementById('api');
+        if (target) {
+            observer.observe(target, { attributes: true, childList: true, subtree: true });
+        }
     </script>
 </body>
 </html>
