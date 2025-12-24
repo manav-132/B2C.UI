@@ -113,32 +113,32 @@
         /* Reset B2C default list styling that causes right-indentation */
         ul { padding: 0; margin: 0; list-style: none; }
 
-        /* 1. Tell the container to use Flexbox and stack items vertically */
-#localAccountForm .entry-item {
+       #forgotPassword {
+    display: inline-block;
+    font-size: 14px;
+    color: #2e71ca; /* Blue color from your image */
+    text-decoration: none;
+    margin-top: 8px; /* Space between box and link */
+    margin-bottom: 20px; /* Space before the Sign-in button */
+    font-weight: 400;
+}
+
+#forgotPassword:hover {
+    text-decoration: underline;
+}
+
+/* Clean up the label div so it only contains the 'Password' text */
+.password-label {
     display: flex;
-    flex-direction: column;
+    justify-content:间-between;
+    align-items: center;
+    margin-bottom: 8px;
 }
 
-/* 2. Assign orders to the elements */
-/* (B2C uses different classes, so we target the standard ones) */
-
-.attrEntry:has(input[type="email"]), 
-.attrEntry:has(input[id="signInName"]) {
-    order: 1; /* Email first */
-}
-
-.attrEntry:has(input[type="password"]) {
-    order: 2; /* Password second */
-}
-
-.forgotPassword {
-    order: 3; /* Forgot password third (Below Password) */
-    margin-top: 5px;
-    margin-bottom: 20px;
-}
-
-.buttons {
-    order: 4; /* Sign-in button last */
+/* Ensure the password input takes full width */
+#password {
+    width: 100%;
+    box-sizing: border-box;
 }
         
     </style>
@@ -175,7 +175,36 @@
             observer.observe(target, { attributes: true, childList: true, subtree: true });
         }
     </script>
+
+    <script>
+    var observer = new MutationObserver(function(mutations) {
+        // 1. Find the elements
+        var forgotLink = document.getElementById('forgotPassword');
+        var passwordInput = document.getElementById('password');
+        var passwordLabelDiv = document.querySelector('.password-label');
+
+        // 2. Logic: Move the link ONLY if it's still inside the label div
+        if (forgotLink && passwordInput) {
+            // Check if the link is currently a child of the label div
+            if (forgotLink.parentElement.classList.contains('password-label')) {
+                // Move the link to be a sibling AFTER the password input box
+                passwordInput.after(forgotLink);
+                
+                // Optional: Hide the empty space left in the label div if needed
+                forgotLink.style.display = "block"; 
+                forgotLink.style.marginTop = "5px";
+            }
+        }
+    });
+
+    // Start watching the #api container
+    var target = document.getElementById('api');
+    if (target) {
+        observer.observe(target, { attributes: true, childList: true, subtree: true });
+    }
+</script>
 </body>
 </html>
+
 
 
