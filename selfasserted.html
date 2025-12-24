@@ -1,15 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Reset Password</title>
+    <title>Verification Page</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        /* This is the magic line that hides the 'Change Email' and 'Cancel' buttons */
-        .changeClaims, #cancel { display: none !important; }
-        /* This makes the 'Continue' button look better centered */
-        .buttons { display: flex; justify-content: center; }
+        /* 1. RESTORE PROFESSIONAL LOOK */
+        body {
+            background-color: #f0f2f5;
+            font-family: "Segoe UI", SegoeUI, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #api {
+            background-color: #ffffff;
+            width: 400px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        button {
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* 2. HIDE THE CANCEL BUTTON ONLY */
+        /* This targets the exact ID and Class you found */
+        #email_ver_but_edit, 
+        .editButton, 
+        #cancel {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        /* 3. STYLE THE REMAINING BUTTONS */
+        #email_ver_but_send, #continue {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            width: 100%;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <div id="api"></div> <!-- B2C injects the screen here -->
+    <div id="api" role="main">
+        <!-- B2C will inject the content here -->
+    </div>
 </body>
 </html>
