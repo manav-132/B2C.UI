@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- LAYOUT & CARD --- */
+        /* --- YOUR EXISTING CSS (UNCHANGED) --- */
         body {
             background-color: #f8f9fa;
             font-family: 'Open Sans', sans-serif;
@@ -24,10 +24,8 @@
             border-radius: 8px;
             border: 1px solid #e1e4e8;
             box-sizing: border-box;
-            text-align: left; /* Fixes right-side indentation */
+            text-align: left;
         }
-
-        /* --- LOGO --- */
         .logo-container {
             text-align: center;
             margin-bottom: 25px;
@@ -36,15 +34,13 @@
             max-width: 220px;
             height: auto;
         }
-
-        /* --- TYPOGRAPHY --- */
         h1, .heading {
             font-size: 28px;
             font-weight: 700;
             color: #000;
             margin: 0 0 20px 0;
         }
-        h2{
+        h2 {
             font-size: 16px;
             font-weight: 200;
             color: #000;
@@ -55,13 +51,10 @@
             line-height: 1.6;
             color: #333;
             margin-bottom: 20px;
-            display:none;
+            display:none; /* Hiding default intro as requested */
         }
-
-        /* --- FORMS & INPUTS --- */
         .attrEntry { margin-bottom: 15px; width: 100%; }
         label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
-        
         input {
             width: 100% !important;
             padding: 12px !important;
@@ -70,15 +63,13 @@
             font-size: 16px !important;
             box-sizing: border-box !important;
         }
-
-        /* --- BUTTONS --- */
         button {
             width: 100% !important;
             padding: 14px !important;
             background-color: #2e71ca !important;
             color: white !important;
             border: none !important;
-            border-radius: 8px !important; /* Rounded Buttons */
+            border-radius: 8px !important;
             font-size: 16px !important;
             font-weight: 600 !important;
             cursor: pointer !important;
@@ -88,140 +79,110 @@
         button:hover { opacity: 0.9; }
         button:disabled { background-color: #ccc !important; cursor: not-allowed; }
 
-        /* --- SPECIFIC FIXES --- */
+        /* Existing Forgot Password Hack - we will override this below for better positioning */
+        .forgotPassword { display: block; margin-top: -10px; margin-bottom: 20px; }
+        #forgotPassword { color: #2e71ca; font-size: 14px; text-decoration: underline; }
 
-        /* Position Forgot Password Link below Password Box */
-        .forgotPassword {
-            display: block;
-            margin-top: -10px;
-            margin-bottom: 20px;
-        }
-        #forgotPassword {
-            color: #2e71ca;
-            font-size: 14px;
-            text-decoration: underline;
-        }
-
-        /* Hide the Continue button in Verification Screen (Img 2) */
-        /* and the Cancel button in success state (Img 3) */
-        #continue[disabled], 
-        #email_ver_but_edit, 
-        .changeClaims, 
-        #cancel { 
-            display: none !important; 
-        }
-
-        /* Reset B2C default list styling that causes right-indentation */
+        #continue[disabled], #email_ver_but_edit, .changeClaims, #cancel { display: none !important; }
         ul { padding: 0; margin: 0; list-style: none; }
 
-       #forgotPassword {
-    display: inline-block;
-    font-size: 14px;
-    color: #2e71ca; /* Blue color from your image */
-    text-decoration: none;
-    margin-top: 37px; /* Space between box and link */
-    margin-bottom: -265px; /* Space before the Sign-in button */
-    font-weight: 400;
-    margin-left:-74px;
-    padding-bottom: 2rem;
-}
+        .password-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0px;
+            margin-top:6px;
+        }
+        #password { width: 100%; box-sizing: border-box; }
+        a.helpLink.tiny { display: none; }
+        label#email_label { margin-top: 13px; }
+        button#continue { display: none; }
 
-#forgotPassword:hover {
-    text-decoration: underline;
-}
+        /* --- NEW ADDITIONS (To fix logo, spacing, and button visibility) --- */
 
-/* Clean up the label div so it only contains the 'Password' text */
-.password-label {
-    display: flex;
-    justify-content:间-between;
-    align-items: center;
-    margin-bottom: 0px;
-    margin-top:6px;
-}
+        /* 1. Ensure the Logo is always visible at the top */
+        #api .logo-container {
+            display: block !important;
+        }
 
-/* Ensure the password input takes full width */
-#password {
-    width: 100%;
-    box-sizing: border-box;
-}
-a.helpLink.tiny {
-    display: none;
-}
-label#email_label {
-    margin-top: 13px;
-}
-button#continue {
-    display: none;
-}
+        /* 2. Fix the Heading & Note appearance (Image 1) */
+        .heading h1 {
+            font-size: 24px !important;
+            margin-bottom: 10px !important;
+        }
         
+        /* 3. This allows the 'Note:...' instruction to be visible on the Sign-In screen only */
+        #localAccountForm .intro p {
+            display: block !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            color: #444 !important;
+        }
+
+        /* 4. Correct Positioning for Forgot Password (replaces previous hacky margins) */
+        #forgotPassword {
+            margin: 10px 0 20px 0 !important;
+            padding-bottom: 0 !important;
+            display: inline-block !important;
+            float: left;
+            width: 100%;
+        }
+
+        /* 5. Clean up the Verification Screen (Image 2) */
+        .ver_intro_msg {
+            display: block !important; /* Show the instruction text */
+            font-size: 14px !important;
+            margin-bottom: 15px !important;
+        }
+
     </style>
 </head>
 <body>
     <div id="api">
-        <!-- ABO Logo added manually here to ensure it appears on every screen -->
+        <!-- ABO Logo manually placed -->
         <div class="logo-container">
-            <img src="https://manav-132.github.io/B2C.UI/abo-logo.png" alt="ABO Logo">
+            <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
         <div id="api-content"></div>
     </div>
 
     <script>
-        // --- AUTOMATION & UI FIXES ---
-        var observer = new MutationObserver(function(mutations) {
-            // 1. AUTO-SKIP "Verified" Screen (Image 3)
-            var continueBtn = document.getElementById('continue');
-            var successMsg = document.querySelector('.verificationSuccess');
-            if (continueBtn && successMsg && successMsg.style.display !== 'none') {
-                continueBtn.click();
-            }
+        (function() {
+            var observer = new MutationObserver(function(mutations) {
+                var continueBtn = document.getElementById('continue');
+                var forgotLink = document.getElementById('forgotPassword');
+                var passwordInput = document.getElementById('password');
+                var verMsg = document.querySelector('.verificationSuccess, #email_success');
 
-            // 2. RE-ORDER Forgot Password (ensure it's below password input)
-            var passwordEntry = document.querySelector('.attrEntry:has(input[type="password"])');
-            var forgotLink = document.querySelector('.forgotPassword');
-            if (passwordEntry && forgotLink) {
-                passwordEntry.after(forgotLink);
-            }
-        });
+                // 1. POSITION FORGOT PASSWORD (Move it below the input box)
+                if (forgotLink && passwordInput) {
+                    if (forgotLink.parentElement.classList.contains('password-label') || 
+                        forgotLink.parentElement.id === 'api') {
+                        passwordInput.after(forgotLink);
+                    }
+                }
 
-        var target = document.getElementById('api');
-        if (target) {
-            observer.observe(target, { attributes: true, childList: true, subtree: true });
-        }
+                // 2. CONTINUE BUTTON VISIBILITY LOGIC
+                if (continueBtn) {
+                    // A. Show Continue button ONLY if we are on the Password Reset screen
+                    // (We detect this by checking for the 'newPassword' input field)
+                    if (document.getElementById('newPassword')) {
+                        continueBtn.style.setProperty('display', 'block', 'important');
+                    }
+
+                    // B. AUTO-SKIP "Verified" Screen (Image 3)
+                    // If the success message is visible, click continue for the user
+                    if (verMsg && window.getComputedStyle(verMsg).display !== 'none') {
+                        continueBtn.click();
+                    }
+                }
+            });
+
+            // Start observing the #api container
+            var target = document.getElementById('api');
+            if (target) {
+                observer.observe(target, { attributes: true, childList: true, subtree: true });
+            }
+        })();
     </script>
-
-    <script>
-    var observer = new MutationObserver(function(mutations) {
-        // 1. Find the elements
-        var forgotLink = document.getElementById('forgotPassword');
-        var passwordInput = document.getElementById('password');
-        var passwordLabelDiv = document.querySelector('.password-label');
-
-        // 2. Logic: Move the link ONLY if it's still inside the label div
-        if (forgotLink && passwordInput) {
-            // Check if the link is currently a child of the label div
-            if (forgotLink.parentElement.classList.contains('password-label')) {
-                // Move the link to be a sibling AFTER the password input box
-                passwordInput.after(forgotLink);
-                
-                // Optional: Hide the empty space left in the label div if needed
-                forgotLink.style.display = "block"; 
-                forgotLink.style.marginTop = "5px";
-            }
-        }
-    });
-
-    // Start watching the #api container
-    var target = document.getElementById('api');
-    if (target) {
-        observer.observe(target, { attributes: true, childList: true, subtree: true });
-    }
-</script>
 </body>
 </html>
-
-
-
-
-
-
-
