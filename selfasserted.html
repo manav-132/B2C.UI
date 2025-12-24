@@ -112,6 +112,34 @@
 
         /* Reset B2C default list styling that causes right-indentation */
         ul { padding: 0; margin: 0; list-style: none; }
+
+        /* 1. Tell the container to use Flexbox and stack items vertically */
+#localAccountForm .entry-item {
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. Assign orders to the elements */
+/* (B2C uses different classes, so we target the standard ones) */
+
+.attrEntry:has(input[type="email"]), 
+.attrEntry:has(input[id="signInName"]) {
+    order: 1; /* Email first */
+}
+
+.attrEntry:has(input[type="password"]) {
+    order: 2; /* Password second */
+}
+
+.forgotPassword {
+    order: 3; /* Forgot password third (Below Password) */
+    margin-top: 5px;
+    margin-bottom: 20px;
+}
+
+.buttons {
+    order: 4; /* Sign-in button last */
+}
         
     </style>
 </head>
@@ -149,4 +177,5 @@
     </script>
 </body>
 </html>
+
 
