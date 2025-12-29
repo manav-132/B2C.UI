@@ -112,48 +112,50 @@
         var continueBtn = document.getElementById('continue');
         var forgotLink = document.getElementById('forgotPassword');
         var passwordInput = document.getElementById('password');
-        var newPasswordInput = document.getElementById('newPassword');
-
-        // 1. FORGOT PASSWORD PLACEMENT (Kept from your original)
+        
+        // 1. FORGOT PASSWORD PLACEMENT
         if (forgotLink && passwordInput) {
             if (forgotLink.parentElement.classList.contains('password-label')) {
                 passwordInput.after(forgotLink);
             }
         }
 
-        // 2. CONTINUE BUTTON VISIBILITY LOGIC
+        // 2. CONTINUE BUTTON LOGIC
         if (continueBtn) {
-            // Check for the success message element that B2C displays upon verification
-            var successMsg = document.getElementById('email_success');
-            var verificationSuccess = document.querySelector('.verificationSuccess');
+            // B2C verification element IDs
+            var sendCodeBtn = document.getElementById('email_ver_but_send');      // "Send verification code"
+            var verifyCodeBtn = document.getElementById('email_ver_but_verify');  // "Verify code"
+            var resendCodeBtn = document.getElementById('email_ver_but_resend');  // "Send new code"
+            var successMsg = document.getElementById('email_success');           // Success message
+
+            // Helper function to check if an element is actually visible on screen
+            function isVisible(el) {
+                if (!el) return false;
+                var style = window.getComputedStyle(el);
+                return style.display !== 'none' && style.visibility !== 'hidden';
+            }
+
+            var isVerified = isVisible(successMsg);
             
-            // Logic to determine if email is verified:
-            // Azure usually sets display: block/inline on #email_success when verified.
-            var isEmailVerified = (successMsg && window.getComputedStyle(successMsg).display !== 'none') || 
-                                 (verificationSuccess && window.getComputedStyle(verificationSuccess).display !== 'none');
+            // If ANY of the verification buttons are visible, the user isn't done yet
+            var isVerifying = isVisible(sendCodeBtn) || isVisible(verifyCodeBtn) || isVisible(resendCodeBtn);
 
-            if (newPasswordInput) {
-                // If we are on the 'Change Password' screen, show the button
+            if (isVerified) {
+                // OTP verified: Show Continue
                 continueBtn.classList.remove('hide-button');
-                continueBtn.style.display = 'block';
+                continueBtn.style.setProperty('display', 'block', 'important');
             } 
-            else if (isEmailVerified) {
-                // OTP verified! Show the continue button
-                continueBtn.classList.remove('hide-button');
-                continueBtn.style.display = 'block';
-            } 
+            else if (isVerifying) {
+                // In progress (any of the 3 buttons visible): Hide Continue
+                continueBtn.classList.add('hide-button');
+                continueBtn.style.setProperty('display', 'none', 'important');
+            }
             else {
-                // Still in verification or initial state: Keep it hidden
-                // Ensure we don't hide it if the page doesn't require email verification at all
-                var verifyBtn = document.getElementById('email_ver_but_verify');
-                var sendCodeBtn = document.getElementById('email_ver_but_send');
-
-                // If verification buttons exist but email isn't verified yet, hide Continue
-                if (verifyBtn || sendCodeBtn) {
-                    continueBtn.classList.add('hide-button');
-                } else {
-                    // If no verification buttons exist (regular login), show Continue
+                // Default state (e.g., standard login screen where no OTP buttons exist)
+                // If the specific OTP buttons are not present at all, let the button show
+                if (!sendCodeBtn && !verifyCodeBtn && !resendCodeBtn) {
                     continueBtn.classList.remove('hide-button');
+                    continueBtn.style.setProperty('display', 'block', 'important');
                 }
             }
         }
@@ -167,6 +169,7 @@
     </script>
 </body>
 </html>
+
 
 
 
