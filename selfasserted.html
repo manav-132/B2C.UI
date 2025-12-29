@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* 1. LAYOUT & MASTER CARD (Image 1 Style) */
+        /* --- LAYOUT & CARD --- */
         body {
             background-color: #f8f9fa;
             font-family: 'Open Sans', sans-serif;
@@ -21,107 +21,70 @@
             background-color: #ffffff;
             width: 100%;
             max-width: 460px;
-            padding: 45px;
+            padding: 40px;
             border-radius: 12px;
             border: 1px solid #e1e4e8;
             box-sizing: border-box;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
 
-        /* 2. LOGO (Always at the top) */
-        .logo-container {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .logo-container img {
-            max-width: 220px;
-            height: auto;
-        }
+        .logo-container { text-align: center; margin-bottom: 30px; }
+        .logo-container img { max-width: 220px; height: auto; }
 
-        /* 3. TYPOGRAPHY (Headings & Notes) */
-        h1, .heading h1 {
-            font-size: 26px !important;
-            font-weight: 700 !important;
-            color: #000 !important;
-            margin: 0 0 20px 0 !important;
-            text-align: left;
-        }
+        /* --- TYPOGRAPHY --- */
+        h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
+        .intro p { display: block !important; font-size: 14px !important; font-weight: 600 !important; line-height: 1.5 !important; margin-bottom: 20px !important; }
 
-        /* Styling the "Note:..." text from Image 1 */
-        .intro p {
-            display: block !important;
-            font-size: 15px !important;
-            font-weight: 600 !important;
-            color: #333 !important;
-            line-height: 1.6 !important;
-            margin-bottom: 25px !important;
-        }
-
-        /* 4. FORM RESET (Fixes Image 2 Indentation) */
-        #api { text-align: left; }
+        /* --- FORM ALIGNMENT (Fixes Indentation) --- */
         ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
         li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
-        .attrEntry { margin-bottom: 18px; width: 100%; }
-
-        /* 5. INPUT FIELDS */
+        
         input {
             width: 100% !important;
-            padding: 14px !important;
+            padding: 12px !important;
             border: 1.5px solid #333 !important;
             border-radius: 8px !important;
-            font-size: 16px !important;
             box-sizing: border-box !important;
-            transition: border-color 0.2s;
         }
-        input:focus { border-color: #2e71ca !important; outline: none; }
 
-        /* 6. ROUNDED BUTTONS (Professional Blue) */
         button {
             width: 100% !important;
-            padding: 16px !important;
+            padding: 14px !important;
             background-color: #2e71ca !important;
             color: white !important;
             border: none !important;
             border-radius: 8px !important;
-            font-size: 16px !important;
-            font-weight: 700 !important;
+            font-weight: 600 !important;
+            margin-top: 15px !important;
             cursor: pointer !important;
-            margin-top: 12px !important;
         }
-        button:hover { background-color: #245ba3 !important; }
-        button:disabled { background-color: #ccc !important; cursor: not-allowed !important; }
 
-        /* 7. DYNAMIC CONTROLS (Hidden Elements) */
-        button#continue { display: none !important; } /* Hidden by default for Image 2/3 */
+        /* --- BUTTON VISIBILITY LOGIC --- */
         
-        #email_ver_but_edit, 
-        .changeClaims, 
-        #cancel, 
-        a.helpLink.tiny { 
+        /* Instead of !important hide, we use a class that JS can control */
+        .hide-button {
+            display: none !important;
+        }
+
+        /* Elements to always hide */
+        #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { 
             display: none !important; 
         }
 
-        /* Forgot Password Link Styling */
         #forgotPassword {
             display: inline-block !important;
-            color: #2e71ca !important;
-            font-size: 14px !important;
-            font-weight: 400 !important;
-            text-decoration: underline !important;
-            margin: 12px 0 20px 0 !important;
-            cursor: pointer;
+            color: #2e71ca;
+            font-size: 14px;
+            margin: 10px 0;
+            text-decoration: underline;
         }
-
     </style>
 </head>
 <body>
     <div class="master-card">
-        <!-- 1. Logo outside #api so B2C never clears it -->
         <div class="logo-container">
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
-
-        <!-- 2. B2C will inject the Sign-in/Verification forms here -->
         <div id="api"></div>
     </div>
 
@@ -131,34 +94,37 @@
                 var continueBtn = document.getElementById('continue');
                 var forgotLink = document.getElementById('forgotPassword');
                 var passwordInput = document.getElementById('password');
-                
-                // --- LOGIC A: MOVE FORGOT PASSWORD LINK (Image 1 fix) ---
+                var newPasswordInput = document.getElementById('newPassword');
+
+                // 1. FORGOT PASSWORD PLACEMENT
                 if (forgotLink && passwordInput) {
-                    // Pull link out of the 'password-label' div and put it under the input box
                     if (forgotLink.parentElement.classList.contains('password-label')) {
                         passwordInput.after(forgotLink);
                     }
                 }
 
-                // --- LOGIC B: SHOW CONTINUE ON PASSWORD RESET SCREEN ---
-                // We detect the final screen by checking for the 'newPassword' field
-                if (document.getElementById('newPassword')) {
-                    if (continueBtn) {
-                        continueBtn.style.setProperty('display', 'block', 'important');
-                    }
-                }
+                // 2. CONTINUE BUTTON LOGIC
+                if (continueBtn) {
+                    // Check for states
+                    var isVerified = document.querySelector('.verificationSuccess, #email_success');
+                    var isSuccessVisible = isVerified && window.getComputedStyle(isVerified).display !== 'none';
 
-                // --- LOGIC C: AUTO-SKIP VERIFIED SCREEN (Image 3 fix) ---
-                var verSuccess = document.querySelector('.verificationSuccess, #email_success');
-                if (verSuccess && window.getComputedStyle(verSuccess).display !== 'none') {
-                    if (continueBtn) {
-                        // Click the hidden button automatically
+                    if (newPasswordInput) {
+                        // STATE: Password Reset Screen -> ALWAYS SHOW
+                        continueBtn.classList.remove('hide-button');
+                        continueBtn.style.display = 'block';
+                    } 
+                    else if (isSuccessVisible) {
+                        // STATE: Verification Success -> CLICK AUTOMATICALLY
                         continueBtn.click();
+                    } 
+                    else {
+                        // STATE: Verification Entry -> HIDE
+                        continueBtn.classList.add('hide-button');
                     }
                 }
             });
 
-            // Start the monitor on the #api div
             var target = document.getElementById('api');
             if (target) {
                 observer.observe(target, { attributes: true, childList: true, subtree: true });
