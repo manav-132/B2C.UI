@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- YOUR EXISTING CSS (UNCHANGED) --- */
+        /* 1. LAYOUT & CARD DESIGN */
         body {
             background-color: #f8f9fa;
             font-family: 'Open Sans', sans-serif;
@@ -16,45 +16,54 @@
             min-height: 100vh;
             margin: 0;
         }
-        #api {
+
+        /* The Main White Box */
+        .master-card {
             background-color: #ffffff;
             width: 100%;
             max-width: 450px;
             padding: 40px;
-            border-radius: 8px;
+            border-radius: 12px;
             border: 1px solid #e1e4e8;
             box-sizing: border-box;
-            text-align: left;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
+
+        /* 2. LOGO STYLE */
         .logo-container {
             text-align: center;
             margin-bottom: 25px;
         }
         .logo-container img {
-            max-width: 220px;
+            max-width: 200px;
             height: auto;
         }
-        h1, .heading {
-            font-size: 28px;
-            font-weight: 700;
-            color: #000;
-            margin: 0 0 20px 0;
+
+        /* 3. B2C CONTAINER RESET (Prevents Indentation) */
+        #api {
+            text-align: left;
         }
-        h2 {
-            font-size: 16px;
-            font-weight: 200;
-            color: #000;
-            margin: 0 0 20px 0;
+        ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
+        li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
+
+        /* 4. TYPOGRAPHY */
+        h1, .heading h1 {
+            font-size: 24px !important;
+            font-weight: 700 !important;
+            color: #000 !important;
+            margin-bottom: 15px !important;
         }
-        .intro p, .instruction {
-            font-size: 15px;
-            line-height: 1.6;
-            color: #333;
-            margin-bottom: 20px;
-            display:none; /* Hiding default intro as requested */
+        /* Style for the "Note:..." instruction */
+        .intro p {
+            display: block !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            color: #444 !important;
+            line-height: 1.5;
+            margin-bottom: 20px !important;
         }
-        .attrEntry { margin-bottom: 15px; width: 100%; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
+
+        /* 5. INPUT FIELDS */
         input {
             width: 100% !important;
             padding: 12px !important;
@@ -62,7 +71,10 @@
             border-radius: 8px !important;
             font-size: 16px !important;
             box-sizing: border-box !important;
+            margin-top: 5px !important;
         }
+
+        /* 6. ROUNDED BLUE BUTTONS */
         button {
             width: 100% !important;
             padding: 14px !important;
@@ -74,75 +86,39 @@
             font-weight: 600 !important;
             cursor: pointer !important;
             margin-top: 15px !important;
-            transition: opacity 0.2s;
         }
-        button:hover { opacity: 0.9; }
-        button:disabled { background-color: #ccc !important; cursor: not-allowed; }
+        button:disabled { background-color: #ccc !important; cursor: not-allowed !important; }
 
-        /* Existing Forgot Password Hack - we will override this below for better positioning */
-        .forgotPassword { display: block; margin-top: -10px; margin-bottom: 20px; }
-        #forgotPassword { color: #2e71ca; font-size: 14px; text-decoration: underline; }
-
-        #continue[disabled], #email_ver_but_edit, .changeClaims, #cancel { display: none !important; }
-        ul { padding: 0; margin: 0; list-style: none; }
-
-        .password-label {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0px;
-            margin-top:6px;
-        }
-        #password { width: 100%; box-sizing: border-box; }
-        a.helpLink.tiny { display: none; }
-        label#email_label { margin-top: 13px; }
-        button#continue { display: none; }
-
-        /* --- NEW ADDITIONS (To fix logo, spacing, and button visibility) --- */
-
-        /* 1. Ensure the Logo is always visible at the top */
-        #api .logo-container {
-            display: block !important;
-        }
-
-        /* 2. Fix the Heading & Note appearance (Image 1) */
-        .heading h1 {
-            font-size: 24px !important;
-            margin-bottom: 10px !important;
-        }
-        
-        /* 3. This allows the 'Note:...' instruction to be visible on the Sign-In screen only */
-        #localAccountForm .intro p {
-            display: block !important;
-            font-size: 14px !important;
-            font-weight: 600 !important;
-            color: #444 !important;
-        }
-
-        /* 4. Correct Positioning for Forgot Password (replaces previous hacky margins) */
+        /* 7. FORGOT PASSWORD LINK */
         #forgotPassword {
-            margin: 10px 0 20px 0 !important;
-            padding-bottom: 0 !important;
             display: inline-block !important;
-            float: left;
-            width: 100%;
+            color: #2e71ca !important;
+            font-size: 14px !important;
+            text-decoration: underline !important;
+            margin-top: 10px !important;
+            margin-bottom: 15px !important;
         }
 
-        /* 5. Clean up the Verification Screen (Image 2) */
-        .ver_intro_msg {
-            display: block !important; /* Show the instruction text */
-            font-size: 14px !important;
-            margin-bottom: 15px !important;
+        /* 8. HIDDEN ELEMENTS (To be toggled by JS) */
+        button#continue, 
+        #email_ver_but_edit, 
+        .changeClaims, 
+        #cancel, 
+        a.helpLink.tiny { 
+            display: none !important; 
         }
 
     </style>
 </head>
 <body>
-    <div id="api">
-        <!-- ABO Logo manually placed -->
+    <div class="master-card">
+        <!-- Logo is outside #api so B2C doesn't delete it -->
         <div class="logo-container">
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
-        <div id="api-content"></div>
+
+        <!-- B2C injects the form here -->
+        <div id="api"></div>
     </div>
 
     <script>
@@ -153,31 +129,30 @@
                 var passwordInput = document.getElementById('password');
                 var verMsg = document.querySelector('.verificationSuccess, #email_success');
 
-                // 1. POSITION FORGOT PASSWORD (Move it below the input box)
+                // A. POSITION FORGOT PASSWORD (Move it below the input box)
                 if (forgotLink && passwordInput) {
-                    if (forgotLink.parentElement.classList.contains('password-label') || 
-                        forgotLink.parentElement.id === 'api') {
+                    // Check if link is still in the original B2C position (inside label)
+                    if (forgotLink.parentElement.classList.contains('password-label')) {
                         passwordInput.after(forgotLink);
                     }
                 }
 
-                // 2. CONTINUE BUTTON VISIBILITY LOGIC
+                // B. CONTINUE BUTTON LOGIC
                 if (continueBtn) {
-                    // A. Show Continue button ONLY if we are on the Password Reset screen
-                    // (We detect this by checking for the 'newPassword' input field)
+                    // 1. If on New Password screen, show the button
                     if (document.getElementById('newPassword')) {
                         continueBtn.style.setProperty('display', 'block', 'important');
                     }
 
-                    // B. AUTO-SKIP "Verified" Screen (Image 3)
-                    // If the success message is visible, click continue for the user
+                    // 2. AUTO-SKIP SUCCESS SCREEN (Image 3 logic)
+                    // If verified message appears, click continue immediately
                     if (verMsg && window.getComputedStyle(verMsg).display !== 'none') {
                         continueBtn.click();
                     }
                 }
             });
 
-            // Start observing the #api container
+            // Start observing
             var target = document.getElementById('api');
             if (target) {
                 observer.observe(target, { attributes: true, childList: true, subtree: true });
