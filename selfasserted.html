@@ -113,55 +113,64 @@
         var forgotLink = document.getElementById('forgotPassword');
         var passwordInput = document.getElementById('password');
 
-        // 1. FORGOT PASSWORD PLACEMENT (Maintaining your existing logic)
+        // 1. FORGOT PASSWORD PLACEMENT
         if (forgotLink && passwordInput) {
             if (forgotLink.parentElement.classList.contains('password-label')) {
                 passwordInput.after(forgotLink);
             }
         }
 
-        // 2. CONTINUE BUTTON CONTROL LOGIC
+        // 2. CONTINUE BUTTON STYLE CONTROL
         if (continueBtn) {
-            // Target the three specific buttons you mentioned
             var sendBtn = document.getElementById('email_ver_but_send');
             var verifyBtn = document.getElementById('email_ver_but_verify');
             var resendBtn = document.getElementById('email_ver_but_resend');
+            var successMsg = document.getElementById('email_success');
 
-            // Helper function to check if a button is currently visible to the user
             function isVisible(el) {
                 if (!el) return false;
                 var style = window.getComputedStyle(el);
-                // A button is "visible" if it's not display:none AND not hidden by B2C aria-hidden
-                return style.display !== 'none' && style.visibility !== 'hidden' && el.getAttribute('aria-hidden') !== 'true';
+                return style.display !== 'none' && el.getAttribute('aria-hidden') !== 'true';
             }
 
-            // Check if ANY of the 3 buttons are currently visible
-            var isAnyVerificationButtonVisible = isVisible(sendBtn) || isVisible(verifyBtn) || isVisible(resendBtn);
+            var isVerifying = isVisible(sendBtn) || isVisible(verifyBtn) || isVisible(resendBtn);
+            var isVerified = isVisible(successMsg);
 
-            if (isAnyVerificationButtonVisible) {
-                // HIDE Continue: One of the OTP buttons is active
-                continueBtn.style.setProperty('display', 'none', 'important');
+            // If we are currently verifying (and not yet successful)
+            if (isVerifying && !isVerified) {
+                // MAKE BUTTON INVISIBLE (But keep its space)
+                continueBtn.style.setProperty('background-color', 'white', 'important');
+                continueBtn.style.setProperty('color', 'white', 'important'); // Hide the text
+                continueBtn.style.setProperty('border', 'none', 'important');
+                continueBtn.style.setProperty('box-shadow', 'none', 'important');
+                continueBtn.style.setProperty('pointer-events', 'none', 'important'); // Disable clicking
+                continueBtn.style.setProperty('cursor', 'default', 'important');
             } else {
-                // SHOW Continue: No OTP buttons are visible (either verified or standard login)
-                continueBtn.style.setProperty('display', 'block', 'important');
+                // RESTORE ORIGINAL STYLES
+                continueBtn.style.setProperty('background-color', '#2e71ca', 'important');
+                continueBtn.style.setProperty('color', 'white', 'important');
+                continueBtn.style.setProperty('pointer-events', 'auto', 'important');
+                continueBtn.style.setProperty('cursor', 'pointer', 'important');
+                // Re-apply border-radius if needed
+                continueBtn.style.setProperty('border-radius', '8px', 'important');
             }
         }
     });
 
     var target = document.getElementById('api');
     if (target) {
-        // We observe 'attributes' so we catch when Azure changes "display: none" to "display: inline"
         observer.observe(target, { 
             attributes: true, 
             childList: true, 
-            subtree: true, 
-            attributeFilter: ['style', 'class', 'aria-hidden'] 
+            subtree: true,
+            attributeFilter: ['style', 'aria-hidden']
         });
     }
 })();
     </script>
 </body>
 </html>
+
 
 
 
