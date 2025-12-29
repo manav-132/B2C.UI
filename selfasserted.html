@@ -108,49 +108,66 @@
 
     <script>
         (function() {
-            var observer = new MutationObserver(function(mutations) {
-                var continueBtn = document.getElementById('continue');
-                var forgotLink = document.getElementById('forgotPassword');
-                var passwordInput = document.getElementById('password');
-                var newPasswordInput = document.getElementById('newPassword');
+    var observer = new MutationObserver(function(mutations) {
+        var continueBtn = document.getElementById('continue');
+        var forgotLink = document.getElementById('forgotPassword');
+        var passwordInput = document.getElementById('password');
+        var newPasswordInput = document.getElementById('newPassword');
 
-                // 1. FORGOT PASSWORD PLACEMENT
-                if (forgotLink && passwordInput) {
-                    if (forgotLink.parentElement.classList.contains('password-label')) {
-                        passwordInput.after(forgotLink);
-                    }
-                }
-
-                // 2. CONTINUE BUTTON LOGIC
-                if (continueBtn) {
-                    // Check for states
-                    var isVerified = document.querySelector('.verificationSuccess, #email_success');
-                    var isSuccessVisible = isVerified && window.getComputedStyle(isVerified).display !== 'none';
-
-                    if (newPasswordInput) {
-                        // STATE: Password Reset Screen -> ALWAYS SHOW
-                        continueBtn.classList.remove('hide-button');
-                        continueBtn.style.display = 'block';
-                    } 
-                    else if (isSuccessVisible) {
-                        // STATE: Verification Success -> CLICK AUTOMATICALLY
-                        continueBtn.click();
-                    } 
-                    else {
-                        // STATE: Verification Entry -> HIDE
-                        continueBtn.classList.add('hide-button');
-                    }
-                }
-            });
-
-            var target = document.getElementById('api');
-            if (target) {
-                observer.observe(target, { attributes: true, childList: true, subtree: true });
+        // 1. FORGOT PASSWORD PLACEMENT (Kept from your original)
+        if (forgotLink && passwordInput) {
+            if (forgotLink.parentElement.classList.contains('password-label')) {
+                passwordInput.after(forgotLink);
             }
-        })();
+        }
+
+        // 2. CONTINUE BUTTON VISIBILITY LOGIC
+        if (continueBtn) {
+            // Check for the success message element that B2C displays upon verification
+            var successMsg = document.getElementById('email_success');
+            var verificationSuccess = document.querySelector('.verificationSuccess');
+            
+            // Logic to determine if email is verified:
+            // Azure usually sets display: block/inline on #email_success when verified.
+            var isEmailVerified = (successMsg && window.getComputedStyle(successMsg).display !== 'none') || 
+                                 (verificationSuccess && window.getComputedStyle(verificationSuccess).display !== 'none');
+
+            if (newPasswordInput) {
+                // If we are on the 'Change Password' screen, show the button
+                continueBtn.classList.remove('hide-button');
+                continueBtn.style.display = 'block';
+            } 
+            else if (isEmailVerified) {
+                // OTP verified! Show the continue button
+                continueBtn.classList.remove('hide-button');
+                continueBtn.style.display = 'block';
+            } 
+            else {
+                // Still in verification or initial state: Keep it hidden
+                // Ensure we don't hide it if the page doesn't require email verification at all
+                var verifyBtn = document.getElementById('email_ver_but_verify');
+                var sendCodeBtn = document.getElementById('email_ver_but_send');
+
+                // If verification buttons exist but email isn't verified yet, hide Continue
+                if (verifyBtn || sendCodeBtn) {
+                    continueBtn.classList.add('hide-button');
+                } else {
+                    // If no verification buttons exist (regular login), show Continue
+                    continueBtn.classList.remove('hide-button');
+                }
+            }
+        }
+    });
+
+    var target = document.getElementById('api');
+    if (target) {
+        observer.observe(target, { attributes: true, childList: true, subtree: true });
+    }
+})();
     </script>
 </body>
 </html>
+
 
 
 
