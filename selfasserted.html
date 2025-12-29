@@ -123,49 +123,59 @@
 
     <script>
         (function() {
-    var observer = new MutationObserver(function(mutations) {
-        // The three buttons you mentioned
-        var sendBtn = document.getElementById('email_ver_but_send');
-        var verifyBtn = document.getElementById('email_ver_but_verify');
-        var resendBtn = document.getElementById('email_ver_but_resend');
-        
-        // The success message
-        var successMsg = document.getElementById('email_success');
-
-        // Helper to check if an element is actually being shown by B2C
-        function isShown(el) {
-            if (!el) return false;
-            var display = window.getComputedStyle(el).display;
-            var ariaHidden = el.getAttribute('aria-hidden');
-            return display !== 'none' && ariaHidden !== 'true';
-        }
-
-        // Logic: Are we in the middle of a verification?
-        var needsVerification = isShown(sendBtn) || isShown(verifyBtn) || isShown(resendBtn);
-        var isAlreadyVerified = isShown(successMsg);
-
-        if (needsVerification && !isAlreadyVerified) {
-            // Add the class to body - CSS takes over from here
-            document.body.classList.add('is-verifying');
-        } else {
-            // Remove the class - Button returns to normal
-            document.body.classList.remove('is-verifying');
-        }
+    // 1. Create the "Shield" element
+    var shield = document.createElement('div');
+    shield.id = 'continue-shield';
+    // Style it to be invisible but block all clicks
+    Object.assign(shield.style, {
+        position: 'absolute',
+        zIndex: '9999',
+        backgroundColor: 'rgba(255,255,255,0.01)', // Almost invisible
+        cursor: 'not-allowed',
+        display: 'none'
     });
+    document.body.appendChild(shield);
 
-    var target = document.getElementById('api');
-    if (target) {
-        observer.observe(target, { 
-            attributes: true, 
-            childList: true, 
-            subtree: true,
-            attributeFilter: ['style', 'aria-hidden'] 
-        });
+    function syncShield() {
+        var btn = document.getElementById('continue');
+        if (!btn) return;
+
+        var rect = btn.getBoundingClientRect();
+        shield.style.top = (rect.top + window.scrollY) + 'px';
+        shield.style.left = (rect.left + window.scrollX) + 'px';
+        shield.style.width = rect.width + 'px';
+        shield.style.height = rect.height + 'px';
+
+        // Visibility Logic
+        var isVerifying = !!(document.getElementById('email_ver_but_send')?.offsetParent || 
+                             document.getElementById('email_ver_but_verify')?.offsetParent || 
+                             document.getElementById('email_ver_but_resend')?.offsetParent);
+        
+        var isVerified = !!(document.getElementById('email_success')?.offsetParent);
+
+        if (isVerifying && !isVerified) {
+            shield.style.display = 'block';
+            btn.style.opacity = '0.3'; // Optional: fade it out so it looks disabled
+        } else {
+            shield.style.display = 'none';
+            btn.style.opacity = '1';
+        }
     }
+
+    // Run sync on every scroll, resize, and mutation
+    window.addEventListener('resize', syncShield);
+    window.addEventListener('scroll', syncShield);
+    
+    var observer = new MutationObserver(syncShield);
+    observer.observe(document.getElementById('api'), { attributes: true, childList: true, subtree: true });
+    
+    // Initial check
+    syncShield();
 })();
     </script>
 </body>
 </html>
+
 
 
 
