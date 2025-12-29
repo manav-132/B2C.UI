@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* 1. LAYOUT & CARD (Image 1 Style) */
+        /* 1. LAYOUT & MASTER CARD (Image 1 Style) */
         body {
             background-color: #f8f9fa;
             font-family: 'Open Sans', sans-serif;
@@ -20,92 +20,95 @@
         .master-card {
             background-color: #ffffff;
             width: 100%;
-            max-width: 480px;
-            padding: 40px;
+            max-width: 460px;
+            padding: 45px;
             border-radius: 12px;
             border: 1px solid #e1e4e8;
             box-sizing: border-box;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
 
-        /* 2. LOGO (Restored for Image 1 & 2) */
+        /* 2. LOGO (Always at the top) */
         .logo-container {
             text-align: center;
-            margin-bottom: 25px;
-            display: block !important;
+            margin-bottom: 30px;
         }
         .logo-container img {
             max-width: 220px;
             height: auto;
         }
 
-        /* 3. TYPOGRAPHY & INSTRUCTIONS */
+        /* 3. TYPOGRAPHY (Headings & Notes) */
         h1, .heading h1 {
             font-size: 26px !important;
             font-weight: 700 !important;
             color: #000 !important;
-            margin: 0 0 15px 0 !important;
+            margin: 0 0 20px 0 !important;
             text-align: left;
         }
 
-        /* Note/Instruction text from Image 1 */
+        /* Styling the "Note:..." text from Image 1 */
         .intro p {
             display: block !important;
-            font-size: 14px !important;
+            font-size: 15px !important;
             font-weight: 600 !important;
             color: #333 !important;
-            line-height: 1.5 !important;
-            margin-bottom: 20px !important;
+            line-height: 1.6 !important;
+            margin-bottom: 25px !important;
         }
 
         /* 4. FORM RESET (Fixes Image 2 Indentation) */
         #api { text-align: left; }
         ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
         li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
-        .attrEntry { margin-bottom: 15px; width: 100%; }
+        .attrEntry { margin-bottom: 18px; width: 100%; }
 
-        /* 5. INPUTS */
+        /* 5. INPUT FIELDS */
         input {
             width: 100% !important;
-            padding: 12px !important;
+            padding: 14px !important;
             border: 1.5px solid #333 !important;
             border-radius: 8px !important;
             font-size: 16px !important;
             box-sizing: border-box !important;
+            transition: border-color 0.2s;
         }
+        input:focus { border-color: #2e71ca !important; outline: none; }
 
-        /* 6. ROUNDED BUTTONS */
+        /* 6. ROUNDED BUTTONS (Professional Blue) */
         button {
             width: 100% !important;
-            padding: 14px !important;
+            padding: 16px !important;
             background-color: #2e71ca !important;
             color: white !important;
             border: none !important;
             border-radius: 8px !important;
             font-size: 16px !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
             cursor: pointer !important;
-            margin-top: 10px !important;
+            margin-top: 12px !important;
         }
+        button:hover { background-color: #245ba3 !important; }
         button:disabled { background-color: #ccc !important; cursor: not-allowed !important; }
 
-        /* 7. DYNAMIC VISIBILITY RULES */
+        /* 7. DYNAMIC CONTROLS (Hidden Elements) */
+        button#continue { display: none !important; } /* Hidden by default for Image 2/3 */
         
-        /* Hide clutter buttons */
-        #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { 
+        #email_ver_but_edit, 
+        .changeClaims, 
+        #cancel, 
+        a.helpLink.tiny { 
             display: none !important; 
         }
 
-        /* Hide Continue button by default (We will click it via JS or show it on the last screen) */
-        button#continue { display: none !important; }
-
-        /* Style Forgot Password Link positioning */
+        /* Forgot Password Link Styling */
         #forgotPassword {
             display: inline-block !important;
             color: #2e71ca !important;
             font-size: 14px !important;
+            font-weight: 400 !important;
             text-decoration: underline !important;
-            margin: 10px 0 15px 0 !important;
+            margin: 12px 0 20px 0 !important;
             cursor: pointer;
         }
 
@@ -113,12 +116,12 @@
 </head>
 <body>
     <div class="master-card">
-        <!-- Logo sits above #api so it is never deleted -->
+        <!-- 1. Logo outside #api so B2C never clears it -->
         <div class="logo-container">
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
 
-        <!-- B2C dynamic content loads here -->
+        <!-- 2. B2C will inject the Sign-in/Verification forms here -->
         <div id="api"></div>
     </div>
 
@@ -129,32 +132,33 @@
                 var forgotLink = document.getElementById('forgotPassword');
                 var passwordInput = document.getElementById('password');
                 
-                // --- A. MOVE FORGOT PASSWORD LINK UNDER THE BOX ---
+                // --- LOGIC A: MOVE FORGOT PASSWORD LINK (Image 1 fix) ---
                 if (forgotLink && passwordInput) {
-                    // If link is still inside the B2C 'password-label' div, move it
+                    // Pull link out of the 'password-label' div and put it under the input box
                     if (forgotLink.parentElement.classList.contains('password-label')) {
                         passwordInput.after(forgotLink);
                     }
                 }
 
-                // --- B. AUTO-SKIP "VERIFIED" SCREEN (Image 3 logic) ---
-                if (continueBtn) {
-                    var verSuccess = document.querySelector('.verificationSuccess, #email_success');
-                    
-                    // If the "E-mail address verified" message appears
-                    if (verSuccess && window.getComputedStyle(verSuccess).display !== 'none') {
-                        // Automatically click the hidden continue button
-                        continueBtn.click();
-                    }
-
-                    // --- C. SHOW CONTINUE ON PASSWORD RESET SCREEN ---
-                    if (document.getElementById('newPassword')) {
+                // --- LOGIC B: SHOW CONTINUE ON PASSWORD RESET SCREEN ---
+                // We detect the final screen by checking for the 'newPassword' field
+                if (document.getElementById('newPassword')) {
+                    if (continueBtn) {
                         continueBtn.style.setProperty('display', 'block', 'important');
+                    }
+                }
+
+                // --- LOGIC C: AUTO-SKIP VERIFIED SCREEN (Image 3 fix) ---
+                var verSuccess = document.querySelector('.verificationSuccess, #email_success');
+                if (verSuccess && window.getComputedStyle(verSuccess).display !== 'none') {
+                    if (continueBtn) {
+                        // Click the hidden button automatically
+                        continueBtn.click();
                     }
                 }
             });
 
-            // Monitor the entire #api container for changes
+            // Start the monitor on the #api div
             var target = document.getElementById('api');
             if (target) {
                 observer.observe(target, { attributes: true, childList: true, subtree: true });
