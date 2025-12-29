@@ -16,6 +16,21 @@
             min-height: 100vh;
             margin: 0;
         }
+        /* This rule will only trigger when our JS adds the class to the body */
+            body.is-verifying #continue {
+                background-color: white !important;
+                color: white !important;
+                border: none !important;
+                box-shadow: none !important;
+                pointer-events: none !important;
+                cursor: default !important;
+                opacity: 0 !important; /* Makes it completely invisible but keeps the layout */
+            }
+            
+            /* Optional: Ensure the button looks normal when NOT verifying */
+            body:not(.is-verifying) #continue {
+                display: block !important;
+            }
 
         .master-card {
             background-color: #ffffff;
@@ -109,51 +124,32 @@
     <script>
         (function() {
     var observer = new MutationObserver(function(mutations) {
-        var continueBtn = document.getElementById('continue');
-        var forgotLink = document.getElementById('forgotPassword');
-        var passwordInput = document.getElementById('password');
+        // The three buttons you mentioned
+        var sendBtn = document.getElementById('email_ver_but_send');
+        var verifyBtn = document.getElementById('email_ver_but_verify');
+        var resendBtn = document.getElementById('email_ver_but_resend');
+        
+        // The success message
+        var successMsg = document.getElementById('email_success');
 
-        // 1. FORGOT PASSWORD PLACEMENT
-        if (forgotLink && passwordInput) {
-            if (forgotLink.parentElement.classList.contains('password-label')) {
-                passwordInput.after(forgotLink);
-            }
+        // Helper to check if an element is actually being shown by B2C
+        function isShown(el) {
+            if (!el) return false;
+            var display = window.getComputedStyle(el).display;
+            var ariaHidden = el.getAttribute('aria-hidden');
+            return display !== 'none' && ariaHidden !== 'true';
         }
 
-        // 2. CONTINUE BUTTON STYLE CONTROL
-        if (continueBtn) {
-            var sendBtn = document.getElementById('email_ver_but_send');
-            var verifyBtn = document.getElementById('email_ver_but_verify');
-            var resendBtn = document.getElementById('email_ver_but_resend');
-            var successMsg = document.getElementById('email_success');
+        // Logic: Are we in the middle of a verification?
+        var needsVerification = isShown(sendBtn) || isShown(verifyBtn) || isShown(resendBtn);
+        var isAlreadyVerified = isShown(successMsg);
 
-            function isVisible(el) {
-                if (!el) return false;
-                var style = window.getComputedStyle(el);
-                return style.display !== 'none' && el.getAttribute('aria-hidden') !== 'true';
-            }
-
-            var isVerifying = isVisible(sendBtn) || isVisible(verifyBtn) || isVisible(resendBtn);
-            var isVerified = isVisible(successMsg);
-
-            // If we are currently verifying (and not yet successful)
-            if (isVerifying && !isVerified) {
-                // MAKE BUTTON INVISIBLE (But keep its space)
-                continueBtn.style.setProperty('background-color', 'white', 'important');
-                continueBtn.style.setProperty('color', 'white', 'important'); // Hide the text
-                continueBtn.style.setProperty('border', 'none', 'important');
-                continueBtn.style.setProperty('box-shadow', 'none', 'important');
-                continueBtn.style.setProperty('pointer-events', 'none', 'important'); // Disable clicking
-                continueBtn.style.setProperty('cursor', 'default', 'important');
-            } else {
-                // RESTORE ORIGINAL STYLES
-                continueBtn.style.setProperty('background-color', '#2e71ca', 'important');
-                continueBtn.style.setProperty('color', 'white', 'important');
-                continueBtn.style.setProperty('pointer-events', 'auto', 'important');
-                continueBtn.style.setProperty('cursor', 'pointer', 'important');
-                // Re-apply border-radius if needed
-                continueBtn.style.setProperty('border-radius', '8px', 'important');
-            }
+        if (needsVerification && !isAlreadyVerified) {
+            // Add the class to body - CSS takes over from here
+            document.body.classList.add('is-verifying');
+        } else {
+            // Remove the class - Button returns to normal
+            document.body.classList.remove('is-verifying');
         }
     });
 
@@ -163,13 +159,14 @@
             attributes: true, 
             childList: true, 
             subtree: true,
-            attributeFilter: ['style', 'aria-hidden']
+            attributeFilter: ['style', 'aria-hidden'] 
         });
     }
 })();
     </script>
 </body>
 </html>
+
 
 
 
