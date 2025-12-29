@@ -112,63 +112,57 @@
         var continueBtn = document.getElementById('continue');
         var forgotLink = document.getElementById('forgotPassword');
         var passwordInput = document.getElementById('password');
-        
-        // 1. FORGOT PASSWORD PLACEMENT
+
+        // 1. FORGOT PASSWORD PLACEMENT (Maintaining your existing logic)
         if (forgotLink && passwordInput) {
             if (forgotLink.parentElement.classList.contains('password-label')) {
                 passwordInput.after(forgotLink);
             }
         }
 
-        // 2. CONTINUE BUTTON LOGIC
+        // 2. CONTINUE BUTTON CONTROL LOGIC
         if (continueBtn) {
-            // B2C verification element IDs
-            var sendCodeBtn = document.getElementById('email_ver_but_send');      // "Send verification code"
-            var verifyCodeBtn = document.getElementById('email_ver_but_verify');  // "Verify code"
-            var resendCodeBtn = document.getElementById('email_ver_but_resend');  // "Send new code"
-            var successMsg = document.getElementById('email_success');           // Success message
+            // Target the three specific buttons you mentioned
+            var sendBtn = document.getElementById('email_ver_but_send');
+            var verifyBtn = document.getElementById('email_ver_but_verify');
+            var resendBtn = document.getElementById('email_ver_but_resend');
 
-            // Helper function to check if an element is actually visible on screen
+            // Helper function to check if a button is currently visible to the user
             function isVisible(el) {
                 if (!el) return false;
                 var style = window.getComputedStyle(el);
-                return style.display !== 'none' && style.visibility !== 'hidden';
+                // A button is "visible" if it's not display:none AND not hidden by B2C aria-hidden
+                return style.display !== 'none' && style.visibility !== 'hidden' && el.getAttribute('aria-hidden') !== 'true';
             }
 
-            var isVerified = isVisible(successMsg);
-            
-            // If ANY of the verification buttons are visible, the user isn't done yet
-            var isVerifying = isVisible(sendCodeBtn) || isVisible(verifyCodeBtn) || isVisible(resendCodeBtn);
+            // Check if ANY of the 3 buttons are currently visible
+            var isAnyVerificationButtonVisible = isVisible(sendBtn) || isVisible(verifyBtn) || isVisible(resendBtn);
 
-            if (isVerified) {
-                // OTP verified: Show Continue
-                continueBtn.classList.remove('hide-button');
-                continueBtn.style.setProperty('display', 'block', 'important');
-            } 
-            else if (isVerifying) {
-                // In progress (any of the 3 buttons visible): Hide Continue
-                continueBtn.classList.add('hide-button');
+            if (isAnyVerificationButtonVisible) {
+                // HIDE Continue: One of the OTP buttons is active
                 continueBtn.style.setProperty('display', 'none', 'important');
-            }
-            else {
-                // Default state (e.g., standard login screen where no OTP buttons exist)
-                // If the specific OTP buttons are not present at all, let the button show
-                if (!sendCodeBtn && !verifyCodeBtn && !resendCodeBtn) {
-                    continueBtn.classList.remove('hide-button');
-                    continueBtn.style.setProperty('display', 'block', 'important');
-                }
+            } else {
+                // SHOW Continue: No OTP buttons are visible (either verified or standard login)
+                continueBtn.style.setProperty('display', 'block', 'important');
             }
         }
     });
 
     var target = document.getElementById('api');
     if (target) {
-        observer.observe(target, { attributes: true, childList: true, subtree: true });
+        // We observe 'attributes' so we catch when Azure changes "display: none" to "display: inline"
+        observer.observe(target, { 
+            attributes: true, 
+            childList: true, 
+            subtree: true, 
+            attributeFilter: ['style', 'class', 'aria-hidden'] 
+        });
     }
 })();
     </script>
 </body>
 </html>
+
 
 
 
