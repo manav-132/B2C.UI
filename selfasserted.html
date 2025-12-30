@@ -109,58 +109,83 @@
 
     <script>
 (function() {
-    function checkAndHide() {
-        const continueBtn = document.getElementById('continue');
-        if (!continueBtn) return;
+    console.log("ABO Debug: Script Initialized");
 
-        // 1. Find the elements that indicate we are in the "Verifying" phase
-        const sendCodeBtn = document.getElementById('email_ver_but_send');
-        const verifyCodeBtn = document.getElementById('email_ver_but_verify');
-        const resendCodeBtn = document.getElementById('email_ver_but_resend');
+    function manageUI() {
+        const continueBtn = document.getElementById('continue');
         
-        // 2. Find the element that indicates "Success"
+        // 1. Check if the Continue button even exists in the DOM yet
+        if (!continueBtn) {
+            console.log("ABO Debug: #continue button not found in DOM yet.");
+            return;
+        }
+
+        // 2. Identify verification elements
+        const sendBtn = document.getElementById('email_ver_but_send');
+        const verifyBtn = document.getElementById('email_ver_but_verify');
+        const resendBtn = document.getElementById('email_ver_but_resend');
         const successMsg = document.getElementById('email_success');
 
-        // Check visibility (offsetParent is null if the element is hidden by B2C logic)
-        const isVerifying = (sendCodeBtn && sendCodeBtn.offsetParent !== null) || 
-                            (verifyCodeBtn && verifyCodeBtn.offsetParent !== null) ||
-                            (resendCodeBtn && resendCodeBtn.offsetParent !== null);
-                            
-        const isVerified = (successMsg && successMsg.offsetParent !== null);
+        // 3. Helper function to check if an element is actually visible to the user
+        function isVisible(el) {
+            return !!(el && el.offsetParent !== null);
+        }
 
-        // --- THE LOGIC ---
+        const isVerifying = isVisible(sendBtn) || isVisible(verifyBtn) || isVisible(resendBtn);
+        const isVerified = isVisible(successMsg);
+
+        // 4. Debug State to Console
+        console.log("ABO Debug State Check:", {
+            sendBtnVisible: isVisible(sendBtn),
+            verifyBtnVisible: isVisible(verifyBtn),
+            successVisible: isVerified,
+            isVerifying: isVerifying
+        });
+
+        // 5. Logic Execution
         if (isVerified) {
-            // Case 1: User is verified. Show the button!
+            console.log("ABO Debug: SUCCESS state detected. Showing button.");
             continueBtn.style.setProperty('display', 'block', 'important');
             continueBtn.style.setProperty('visibility', 'visible', 'important');
             continueBtn.style.setProperty('opacity', '1', 'important');
-        } else if (isVerifying || !isVerified) {
-            // Case 2: User is still verifying OR hasn't started yet. Hide it!
+        } 
+        else if (isVerifying) {
+            console.log("ABO Debug: VERIFYING state detected. Hiding button.");
             continueBtn.style.setProperty('display', 'none', 'important');
-            continueBtn.style.setProperty('visibility', 'hidden', 'important');
+        } 
+        else {
+            // This covers the initial load before the user clicks anything
+            console.log("ABO Debug: IDLE/START state detected. Hiding button as precaution.");
+            continueBtn.style.setProperty('display', 'none', 'important');
         }
     }
 
-    // A MutationObserver watches for changes in the B2C form
-    const observer = new MutationObserver(checkAndHide);
-    const target = document.getElementById('api');
-    if (target) {
-        observer.observe(target, { childList: true, subtree: true, attributes: true });
+    // --- EXECUTION ENGINES ---
+
+    // Engine 1: Watch for DOM changes (Efficient)
+    const observer = new MutationObserver(() => {
+        console.log("ABO Debug: DOM Mutation detected in #api");
+        manageUI();
+    });
+
+    const apiTarget = document.getElementById('api');
+    if (apiTarget) {
+        observer.observe(apiTarget, { childList: true, subtree: true, attributes: true });
+    } else {
+        console.warn("ABO Debug: #api container not found. MutationObserver failed.");
     }
 
-    // A "Force Loop" to catch any B2C overrides (runs every 100ms)
-    const forceLoop = setInterval(checkAndHide, 100);
+    // Engine 2: Force Interval (The Safety Net)
+    // This runs every 500ms to catch cases where B2C blocks the observer
+    const forceLoop = setInterval(manageUI, 500);
 
-    // Stop the loop after 10 seconds to save performance if needed, 
-    // or keep it running to ensure the button never pops back up.
-    // setTimeout(() => clearInterval(forceLoop), 10000); 
-
-    // Initial run
-    checkAndHide();
+    // Initial immediate run
+    manageUI();
 })();
 </script>
 </body>
 </html>
+
 
 
 
