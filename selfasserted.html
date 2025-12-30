@@ -108,62 +108,60 @@
     </div>
 
     <script>
-    (function() {
-        // Function to control the visibility of the Continue button
-        function manageContinueButton() {
-            const continueBtn = document.getElementById('continue');
-            if (!continueBtn) return;
+(function() {
+    function checkAndHide() {
+        const continueBtn = document.getElementById('continue');
+        if (!continueBtn) return;
 
-            // 1. Identify the verification states
-            // We check if the "Send Code", "Verify Code", or "Resend Code" buttons are currently visible
-            const isVerificationActive = !!(
-                (document.getElementById('email_ver_but_send')?.offsetParent !== null) ||
-                (document.getElementById('email_ver_but_verify')?.offsetParent !== null) ||
-                (document.getElementById('email_ver_but_resend')?.offsetParent !== null)
-            );
+        // 1. Find the elements that indicate we are in the "Verifying" phase
+        const sendCodeBtn = document.getElementById('email_ver_but_send');
+        const verifyCodeBtn = document.getElementById('email_ver_but_verify');
+        const resendCodeBtn = document.getElementById('email_ver_but_resend');
+        
+        // 2. Find the element that indicates "Success"
+        const successMsg = document.getElementById('email_success');
 
-            // 2. Check if the "Success" message is visible (Email is verified)
-            const isVerified = document.getElementById('email_success')?.offsetParent !== null;
+        // Check visibility (offsetParent is null if the element is hidden by B2C logic)
+        const isVerifying = (sendCodeBtn && sendCodeBtn.offsetParent !== null) || 
+                            (verifyCodeBtn && verifyCodeBtn.offsetParent !== null) ||
+                            (resendCodeBtn && resendCodeBtn.offsetParent !== null);
+                            
+        const isVerified = (successMsg && successMsg.offsetParent !== null);
 
-            // 3. Logic: Hide if verification is in progress, Show only if verified
-            // If verification buttons are present and we aren't "Success" yet, hide it.
-            if (isVerificationActive && !isVerified) {
-                continueBtn.style.setProperty('display', 'none', 'important');
-                continueBtn.style.setProperty('visibility', 'hidden', 'important');
-            } else if (isVerified) {
-                // Once verified, bring it back
-                continueBtn.style.setProperty('display', 'block', 'important');
-                continueBtn.style.setProperty('visibility', 'visible', 'important');
-            } else {
-                // Initial state (before email is entered) - usually hidden to prevent premature clicks
-                continueBtn.style.setProperty('display', 'none', 'important');
-            }
+        // --- THE LOGIC ---
+        if (isVerified) {
+            // Case 1: User is verified. Show the button!
+            continueBtn.style.setProperty('display', 'block', 'important');
+            continueBtn.style.setProperty('visibility', 'visible', 'important');
+            continueBtn.style.setProperty('opacity', '1', 'important');
+        } else if (isVerifying || !isVerified) {
+            // Case 2: User is still verifying OR hasn't started yet. Hide it!
+            continueBtn.style.setProperty('display', 'none', 'important');
+            continueBtn.style.setProperty('visibility', 'hidden', 'important');
         }
+    }
 
-        // Create an observer to watch for ANY changes inside the #api container
-        const observer = new MutationObserver((mutations) => {
-            manageContinueButton();
-        });
+    // A MutationObserver watches for changes in the B2C form
+    const observer = new MutationObserver(checkAndHide);
+    const target = document.getElementById('api');
+    if (target) {
+        observer.observe(target, { childList: true, subtree: true, attributes: true });
+    }
 
-        // Start observing the #api div for changes in the UI
-        const apiTarget = document.getElementById('api');
-        if (apiTarget) {
-            observer.observe(apiTarget, { 
-                childList: true, 
-                subtree: true, 
-                attributes: true, 
-                attributeFilter: ['style', 'class'] 
-            });
-        }
+    // A "Force Loop" to catch any B2C overrides (runs every 100ms)
+    const forceLoop = setInterval(checkAndHide, 100);
 
-        // Run once on load
-        window.addEventListener('load', manageContinueButton);
-        // Run immediately in case script loads after DOM
-        manageContinueButton();
-    })();
+    // Stop the loop after 10 seconds to save performance if needed, 
+    // or keep it running to ensure the button never pops back up.
+    // setTimeout(() => clearInterval(forceLoop), 10000); 
+
+    // Initial run
+    checkAndHide();
+})();
 </script>
 </body>
 </html>
+
 
 
 
