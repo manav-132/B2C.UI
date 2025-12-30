@@ -107,49 +107,65 @@
 
 <script>
 (function() {
-    function manageUI() {
-        // UPDATED: Look for 'next' (Sign-In) or 'continue' (Verification/Signup)
-        const mainBtn = document.getElementById('next') || document.getElementById('continue');
-        if (!mainBtn) return;
+console.log("ABO Debug: Script Initialized");
+function manageUI() {
+    const continueBtn = document.getElementById('continue');
+    if (!continueBtn) return;
 
-        const emailInput = document.getElementById('email');
-        const verificationControl = document.getElementById('email_ver_control') || document.querySelector('.verificationControlLayout');
-        const sendBtn = document.getElementById('email_ver_but_send');
-        const verifyBtn = document.getElementById('email_ver_but_verify');
-        const successMsg = document.getElementById('email_success');
+    // 1. Check if an email verification control exists on THIS specific page
+    // B2C usually puts the verification elements inside a container or uses these IDs
+    const emailInput = document.getElementById('email');
+    const verificationControl = document.getElementById('email_ver_control') || document.querySelector('.verificationControlLayout');
+    
+    // 2. Identify the verification state elements
+    const sendBtn = document.getElementById('email_ver_but_send');
+    const verifyBtn = document.getElementById('email_ver_but_verify');
+    const successMsg = document.getElementById('email_success');
 
-        function isVisible(el) {
-            return !!(el && el.offsetParent !== null);
-        }
-
-        const hasEmailVerificationOnPage = !!(emailInput || verificationControl || sendBtn);
-        const isVerified = isVisible(successMsg);
-
-        // LOGIC
-        if (!hasEmailVerificationOnPage) {
-            // This handles Sign-In screen or Password Reset screen
-            mainBtn.style.setProperty('display', 'block', 'important');
-            mainBtn.style.setProperty('visibility', 'visible', 'important');
-        } 
-        else if (isVerified) {
-            // Email is verified, show the button
-            mainBtn.style.setProperty('display', 'block', 'important');
-            mainBtn.style.setProperty('visibility', 'visible', 'important');
-        } 
-        else {
-            // Verification is present but not finished, hide the button
-            mainBtn.style.setProperty('display', 'none', 'important');
-        }
+    function isVisible(el) {
+        return !!(el && el.offsetParent !== null);
     }
 
-    const observer = new MutationObserver(manageUI);
-    const apiTarget = document.getElementById('api');
-    if (apiTarget) {
-        observer.observe(apiTarget, { childList: true, subtree: true, attributes: true });
+    const hasEmailVerificationOnPage = !!(emailInput || verificationControl || sendBtn);
+    const isVerifying = isVisible(sendBtn) || isVisible(verifyBtn);
+    const isVerified = isVisible(successMsg);
+
+    // --- NEW LOGIC ---
+
+    if (!hasEmailVerificationOnPage) {
+        // CASE A: This is a screen like "New Password" where no email verification is needed.
+        // Ensure the button is VISIBLE.
+        console.log("ABO Debug: No verification control found. Showing button for standard form.");
+        continueBtn.style.setProperty('display', 'block', 'important');
+        continueBtn.style.setProperty('visibility', 'visible', 'important');
+    } 
+    else if (isVerified) {
+        // CASE B: Email verification is present and SUCCESSFUL.
+        console.log("ABO Debug: Verification Successful. Showing button.");
+        continueBtn.style.setProperty('display', 'block', 'important');
+        continueBtn.style.setProperty('visibility', 'visible', 'important');
+    } 
+    else {
+        // CASE C: Email verification is present but NOT finished.
+        console.log("ABO Debug: Verification in progress/required. Hiding button.");
+        continueBtn.style.setProperty('display', 'none', 'important');
     }
-    setInterval(manageUI, 500);
-    manageUI();
+}
+
+// Standard B2C Observers
+const observer = new MutationObserver(manageUI);
+const apiTarget = document.getElementById('api');
+if (apiTarget) {
+    observer.observe(apiTarget, { childList: true, subtree: true, attributes: true });
+}
+
+// Safety net interval
+setInterval(manageUI, 500);
+
+// Initial run
+manageUI();
 })();
 </script>
 </body>
 </html>
+
