@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* --- LAYOUT & CARD --- */
         body {
             background-color: #f8f9fa;
             font-family: 'Open Sans', sans-serif;
@@ -15,6 +16,7 @@
             min-height: 100vh;
             margin: 0;
         }
+
         .master-card {
             background-color: #ffffff;
             width: 100%;
@@ -25,11 +27,30 @@
             box-sizing: border-box;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
-        .heading, .h1, .intro p, #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { 
-            display: none !important; 
+        .heading {
+            display: none;
+        }
+        .h1 {
+            display: none;
+        }
+        .intro p{
+             display: none !important ;
+        }
+        h2 {
+            font-size: 1rem !important;
+            font-weight: 400 !important;
         }
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
+
+        /* --- TYPOGRAPHY --- */
+        h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
+        .intro p { display: none !important; font-size: 14px !important; font-weight: 600 !important; line-height: 1.5 !important; margin-bottom: 20px !important; }
+
+        /* --- FORM ALIGNMENT (Fixes Indentation) --- */
+        ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
+        li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
+        
         input {
             width: 100% !important;
             padding: 12px !important;
@@ -38,6 +59,7 @@
             box-sizing: border-box !important;
             margin-top: 5px;
         }
+
         button {
             width: 100% !important;
             padding: 14px !important;
@@ -49,7 +71,24 @@
             margin-top: 15px !important;
             cursor: pointer !important;
         }
-        label#email_label { margin-top: 20px !important; display: inline-block; }
+
+        /* --- BUTTON VISIBILITY LOGIC --- */
+        
+        /* Instead of !important hide, we use a class that JS can control */
+        .hide-button {
+            display: none !important;
+        
+        }
+
+        label#email_label {
+            margin-top: 20px !important;
+            display: inline-block;
+        }
+        /* Elements to always hide */
+        #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { 
+            display: none !important; 
+        }
+
         #forgotPassword {
             display: inline-block !important;
             color: #2e71ca;
@@ -67,44 +106,52 @@
         <div id="api"></div>
     </div>
 
-    <!-- SCRIPT MOVED INSIDE BODY -->
     <script>
         (function() {
-            function manageUI() {
-                // Find button (Login uses 'next', Verification uses 'continue')
-                var btn = document.getElementById('continue') || document.getElementById('next');
-                if (!btn) return;
+            var observer = new MutationObserver(function(mutations) {
+                var continueBtn = document.getElementById('continue');
+                var forgotLink = document.getElementById('forgotPassword');
+                var passwordInput = document.getElementById('password');
+                var newPasswordInput = document.getElementById('newPassword');
 
-                var verControl = document.getElementById('email_ver_control');
-                var successMsg = document.getElementById('email_success');
-
-                var isVisible = function(el) {
-                    return !!(el && el.offsetParent !== null);
-                };
-
-                // LOGIC: 
-                // 1. If not a verification page, show button.
-                // 2. If verification page and verified, show button.
-                // 3. Otherwise, hide button.
-                if (!verControl) {
-                    btn.style.setProperty('display', 'block', 'important');
-                    btn.style.setProperty('visibility', 'visible', 'important');
-                } else if (isVisible(successMsg)) {
-                    btn.style.setProperty('display', 'block', 'important');
-                    btn.style.setProperty('visibility', 'visible', 'important');
-                } else {
-                    btn.style.setProperty('display', 'none', 'important');
+                // 1. FORGOT PASSWORD PLACEMENT
+                if (forgotLink && passwordInput) {
+                    if (forgotLink.parentElement.classList.contains('password-label')) {
+                        passwordInput.after(forgotLink);
+                    }
                 }
-            }
 
-            var observer = new MutationObserver(manageUI);
-            var apiTarget = document.getElementById('api');
-            if (apiTarget) {
-                observer.observe(apiTarget, { childList: true, subtree: true, attributes: true });
+                // 2. CONTINUE BUTTON LOGIC
+                if (continueBtn) {
+                    // Check for states
+                    var isVerified = document.querySelector('.verificationSuccess, #email_success');
+                    var isSuccessVisible = isVerified && window.getComputedStyle(isVerified).display !== 'none';
+
+                    if (newPasswordInput) {
+                        // STATE: Password Reset Screen -> ALWAYS SHOW
+                        continueBtn.classList.remove('hide-button');
+                        continueBtn.style.display = 'block';
+                    } 
+                    else if (isSuccessVisible) {
+                        // STATE: Verification Success -> CLICK AUTOMATICALLY
+                        continueBtn.click();
+                    } 
+                    else {
+                        // STATE: Verification Entry -> HIDE
+                        continueBtn.classList.add('hide-button');
+                    }
+                }
+            });
+
+            var target = document.getElementById('api');
+            if (target) {
+                observer.observe(target, { attributes: true, childList: true, subtree: true });
             }
-            setInterval(manageUI, 500);
-            manageUI();
         })();
     </script>
 </body>
 </html>
+
+
+
+
