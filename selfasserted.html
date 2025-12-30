@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- LAYOUT & CARD --- */
         body {
             background-color: #f8f9fa;
             font-family: 'Open Sans', sans-serif;
@@ -16,7 +15,6 @@
             min-height: 100vh;
             margin: 0;
         }
-
         .master-card {
             background-color: #ffffff;
             width: 100%;
@@ -27,30 +25,11 @@
             box-sizing: border-box;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
-        .heading {
-            display: none;
-        }
-        .h1 {
-            display: none;
-        }
-        .intro p{
-             display: none !important ;
-        }
-        h2 {
-            font-size: 1rem !important;
-            font-weight: 400 !important;
+        .heading, .h1, .intro p, #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { 
+            display: none !important; 
         }
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
-
-        /* --- TYPOGRAPHY --- */
-        h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
-        .intro p { display: none !important; font-size: 14px !important; font-weight: 600 !important; line-height: 1.5 !important; margin-bottom: 20px !important; }
-
-        /* --- FORM ALIGNMENT (Fixes Indentation) --- */
-        ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
-        li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
-        
         input {
             width: 100% !important;
             padding: 12px !important;
@@ -59,7 +38,6 @@
             box-sizing: border-box !important;
             margin-top: 5px;
         }
-
         button {
             width: 100% !important;
             padding: 14px !important;
@@ -71,24 +49,7 @@
             margin-top: 15px !important;
             cursor: pointer !important;
         }
-
-        /* --- BUTTON VISIBILITY LOGIC --- */
-        
-        /* Instead of !important hide, we use a class that JS can control */
-        .hide-button {
-            display: none !important;
-        
-        }
-
-        label#email_label {
-            margin-top: 20px !important;
-            display: inline-block;
-        }
-        /* Elements to always hide */
-        #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { 
-            display: none !important; 
-        }
-
+        label#email_label { margin-top: 20px !important; display: inline-block; }
         #forgotPassword {
             display: inline-block !important;
             color: #2e71ca;
@@ -105,10 +66,12 @@
         </div>
         <div id="api"></div>
     </div>
-</body>
+
+    <!-- SCRIPT MOVED INSIDE BODY -->
     <script>
         (function() {
             function manageUI() {
+                // Find button (Login uses 'next', Verification uses 'continue')
                 var btn = document.getElementById('continue') || document.getElementById('next');
                 if (!btn) return;
 
@@ -119,6 +82,10 @@
                     return !!(el && el.offsetParent !== null);
                 };
 
+                // LOGIC: 
+                // 1. If not a verification page, show button.
+                // 2. If verification page and verified, show button.
+                // 3. Otherwise, hide button.
                 if (!verControl) {
                     btn.style.setProperty('display', 'block', 'important');
                     btn.style.setProperty('visibility', 'visible', 'important');
@@ -131,18 +98,13 @@
             }
 
             var observer = new MutationObserver(manageUI);
-            var api = document.getElementById('api');
-            if (api) {
-                observer.observe(api, { childList: true, subtree: true, attributes: true });
+            var apiTarget = document.getElementById('api');
+            if (apiTarget) {
+                observer.observe(apiTarget, { childList: true, subtree: true, attributes: true });
             }
             setInterval(manageUI, 500);
             manageUI();
         })();
     </script>
-
+</body>
 </html>
-
-
-
-
-
