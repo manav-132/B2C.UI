@@ -16,87 +16,86 @@
             min-height: 100vh;
             margin: 0;
         }
+.master-card {
+        background-color: #ffffff;
+        width: 100%;
+        max-width: 460px;
+        padding: 40px;
+        border-radius: 12px;
+        border: 1px solid #e1e4e8;
+        box-sizing: border-box;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+    .heading {
+        display: none;
+    }
+    .h1 {
+        display: none;
+    }
+    .intro p{
+         display: none !important ;
+    }
+    h2 {
+        font-size: 1rem !important;
+        font-weight: 400 !important;
+    }
+    .logo-container { text-align: center; margin-bottom: 30px; }
+    .logo-container img { max-width: 220px; height: auto; }
 
-        .master-card {
-            background-color: #ffffff;
-            width: 100%;
-            max-width: 460px;
-            padding: 40px;
-            border-radius: 12px;
-            border: 1px solid #e1e4e8;
-            box-sizing: border-box;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        }
-        .heading {
-            display: none;
-        }
-        .h1 {
-            display: none;
-        }
-        .intro p{
-             display: none !important ;
-        }
-        h2 {
-            font-size: 1rem !important;
-            font-weight: 400 !important;
-        }
-        .logo-container { text-align: center; margin-bottom: 30px; }
-        .logo-container img { max-width: 220px; height: auto; }
+    /* --- TYPOGRAPHY --- */
+    h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
+    .intro p { display: none !important; font-size: 14px !important; font-weight: 600 !important; line-height: 1.5 !important; margin-bottom: 20px !important; }
 
-        /* --- TYPOGRAPHY --- */
-        h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
-        .intro p { display: none !important; font-size: 14px !important; font-weight: 600 !important; line-height: 1.5 !important; margin-bottom: 20px !important; }
+    /* --- FORM ALIGNMENT (Fixes Indentation) --- */
+    ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
+    li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
+    
+    input {
+        width: 100% !important;
+        padding: 12px !important;
+        border: 1.5px solid #333 !important;
+        border-radius: 8px !important;
+        box-sizing: border-box !important;
+        margin-top: 5px;
+    }
 
-        /* --- FORM ALIGNMENT (Fixes Indentation) --- */
-        ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
-        li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
-        
-        input {
-            width: 100% !important;
-            padding: 12px !important;
-            border: 1.5px solid #333 !important;
-            border-radius: 8px !important;
-            box-sizing: border-box !important;
-            margin-top: 5px;
-        }
+    button {
+        width: 100% !important;
+        padding: 14px !important;
+        background-color: #2e71ca !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        margin-top: 15px !important;
+        cursor: pointer !important;
+    }
 
-        button {
-            width: 100% !important;
-            padding: 14px !important;
-            background-color: #2e71ca !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            margin-top: 15px !important;
-            cursor: pointer !important;
-        }
+    /* --- BUTTON VISIBILITY LOGIC --- */
+    
+    /* Instead of !important hide, we use a class that JS can control */
+    .hide-button {
+        display: none !important;
+    
+    }
 
-        /* --- BUTTON VISIBILITY LOGIC --- */
-        
-        /* Instead of !important hide, we use a class that JS can control */
-        .hide-button {
-            display: none !important;
-        
-        }
+    label#email_label {
+        margin-top: 20px !important;
+        display: inline-block;
+    }
+    /* Elements to always hide */
+    #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { 
+        display: none !important; 
+    }
 
-        label#email_label {
-            margin-top: 20px !important;
-            display: inline-block;
-        }
-        /* Elements to always hide */
-        #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { 
-            display: none !important; 
-        }
-
-        #forgotPassword {
-            display: inline-block !important;
-            color: #2e71ca;
-            font-size: 14px;
-            margin: 10px 0;
-            text-decoration: underline;
-        }
-    </style>
+    #forgotPassword {
+        display: inline-block !important;
+        color: #2e71ca;
+        font-size: 14px;
+        margin: 10px 0;
+        text-decoration: underline;
+    }
+</style>
 </head>
 <body>
     <div class="master-card">
@@ -106,52 +105,66 @@
         <div id="api"></div>
     </div>
 
-    <script>
-        (function() {
-            var observer = new MutationObserver(function(mutations) {
-                var continueBtn = document.getElementById('continue');
-                var forgotLink = document.getElementById('forgotPassword');
-                var passwordInput = document.getElementById('password');
-                var newPasswordInput = document.getElementById('newPassword');
+<script>
+(function() {
+console.log("ABO Debug: Script Initialized");
+function manageUI() {
+    const continueBtn = document.getElementById('continue');
+    if (!continueBtn) return;
 
-                // 1. FORGOT PASSWORD PLACEMENT
-                if (forgotLink && passwordInput) {
-                    if (forgotLink.parentElement.classList.contains('password-label')) {
-                        passwordInput.after(forgotLink);
-                    }
-                }
+    // 1. Check if an email verification control exists on THIS specific page
+    // B2C usually puts the verification elements inside a container or uses these IDs
+    const emailInput = document.getElementById('email');
+    const verificationControl = document.getElementById('email_ver_control') || document.querySelector('.verificationControlLayout');
+    
+    // 2. Identify the verification state elements
+    const sendBtn = document.getElementById('email_ver_but_send');
+    const verifyBtn = document.getElementById('email_ver_but_verify');
+    const successMsg = document.getElementById('email_success');
 
-                // 2. CONTINUE BUTTON LOGIC
-                if (continueBtn) {
-                    // Check for states
-                    var isVerified = document.querySelector('.verificationSuccess, #email_success');
-                    var isSuccessVisible = isVerified && window.getComputedStyle(isVerified).display !== 'none';
+    function isVisible(el) {
+        return !!(el && el.offsetParent !== null);
+    }
 
-                    if (newPasswordInput) {
-                        // STATE: Password Reset Screen -> ALWAYS SHOW
-                        continueBtn.classList.remove('hide-button');
-                        continueBtn.style.display = 'block';
-                    } 
-                    else if (isSuccessVisible) {
-                        // STATE: Verification Success -> CLICK AUTOMATICALLY
-                        continueBtn.click();
-                    } 
-                    else {
-                        // STATE: Verification Entry -> HIDE
-                        continueBtn.classList.add('hide-button');
-                    }
-                }
-            });
+    const hasEmailVerificationOnPage = !!(emailInput || verificationControl || sendBtn);
+    const isVerifying = isVisible(sendBtn) || isVisible(verifyBtn);
+    const isVerified = isVisible(successMsg);
 
-            var target = document.getElementById('api');
-            if (target) {
-                observer.observe(target, { attributes: true, childList: true, subtree: true });
-            }
-        })();
-    </script>
+    // --- NEW LOGIC ---
+
+    if (!hasEmailVerificationOnPage) {
+        // CASE A: This is a screen like "New Password" where no email verification is needed.
+        // Ensure the button is VISIBLE.
+        console.log("ABO Debug: No verification control found. Showing button for standard form.");
+        continueBtn.style.setProperty('display', 'block', 'important');
+        continueBtn.style.setProperty('visibility', 'visible', 'important');
+    } 
+    else if (isVerified) {
+        // CASE B: Email verification is present and SUCCESSFUL.
+        console.log("ABO Debug: Verification Successful. Showing button.");
+        continueBtn.style.setProperty('display', 'block', 'important');
+        continueBtn.style.setProperty('visibility', 'visible', 'important');
+    } 
+    else {
+        // CASE C: Email verification is present but NOT finished.
+        console.log("ABO Debug: Verification in progress/required. Hiding button.");
+        continueBtn.style.setProperty('display', 'none', 'important');
+    }
+}
+
+// Standard B2C Observers
+const observer = new MutationObserver(manageUI);
+const apiTarget = document.getElementById('api');
+if (apiTarget) {
+    observer.observe(apiTarget, { childList: true, subtree: true, attributes: true });
+}
+
+// Safety net interval
+setInterval(manageUI, 500);
+
+// Initial run
+manageUI();
+})();
+</script>
 </body>
 </html>
-
-
-
-
