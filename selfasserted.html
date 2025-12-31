@@ -70,7 +70,21 @@
         margin-top: 15px !important;
         cursor: pointer !important;
     }
-
+    div#verifying_blurb{
+        display:none !important;
+    }
+    div#claimVerificationServerError {
+    display: none !important;
+}
+        .error.itemLevel.show {
+    display: none !important;
+}
+        .error.itemLevel {
+    color: red;
+}
+        .error.pageLevel {
+    color: red;
+}
     /* --- BUTTON VISIBILITY LOGIC --- */
     
     /* Instead of !important hide, we use a class that JS can control */
@@ -169,5 +183,6 @@ manageUI();
 
 </body>
 </html>
+
 
 
