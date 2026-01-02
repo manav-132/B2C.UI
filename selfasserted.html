@@ -113,7 +113,12 @@
         text-decoration: underline;
     }
        /* Custom Styles for Toggle */
+/* Custom Styles for Toggle */
 .hidden-ui {
+    display: none !important;
+}
+
+#custom-action-container.hidden-permanently {
     display: none !important;
 }
 
@@ -125,95 +130,106 @@
 }
 
 .btn-reset {
-    width: 100%;
-    padding: 14px;
-    background-color: #2e71ca;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
+    width: 100% !important;
+    padding: 14px !important;
+    background-color: #2e71ca !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
 }
 
 .btn-outline {
-    width: 100%;
-    padding: 14px;
-    background-color: transparent;
-    color: #2e71ca;
-    border: 1px solid #2e71ca;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
+    width: 100% !important;
+    padding: 14px !important;
+    background-color: transparent !important;
+    color: #2e71ca !important;
+    border: 1px solid #2e71ca !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    margin-top: 10px !important;
 }
 </style>
     <script>
         (function() {
-    function initializeCustomFlow() {
+    let userInteracted = false;
+
+    function handleCustomFlow() {
         const apiDiv = document.getElementById('api');
         if (!apiDiv) return;
 
         // 1. Identify B2C Elements
-        // We find the parent 'li' or 'div' to ensure labels are hidden too
-        const emailContainer = document.querySelector('.entry-item:has(#email)') || document.getElementById('email')?.parentElement;
-        const passwordContainer = document.querySelector('.entry-item:has(#password)') || document.getElementById('password')?.parentElement;
+        const emailField = document.getElementById('email');
+        const passwordField = document.getElementById('password');
+        const emailContainer = emailField ? (emailField.closest('li') || emailField.parentElement) : null;
+        const passwordContainer = passwordField ? (passwordField.closest('li') || passwordField.parentElement) : null;
         const signInButton = document.getElementById('next') || document.querySelector('button#continue');
         const forgotPasswordLink = document.getElementById('forgotPassword');
 
-        // If we've already injected our buttons, don't do it again
-        if (document.getElementById('custom-action-container')) return;
+        // Only proceed with button logic if we are on the SIGN-IN page 
+        // (Identified by presence of both email and password fields)
+        const isLoginPage = emailField && passwordField;
 
-        // 2. Create the Custom Button Container
-        const container = document.createElement('div');
-        container.id = 'custom-action-container';
-        container.className = 'custom-btn-container';
+        if (!isLoginPage) {
+            // We are on a different page (like Reset Password or Verification)
+            // Remove our custom buttons if they exist
+            const existingContainer = document.getElementById('custom-action-container');
+            if (existingContainer) existingContainer.remove();
+            return;
+        }
 
-        // 3. Create "Reset My Password" Button
-        const resetBtn = document.createElement('button');
-        resetBtn.innerText = 'Reset My Password';
-        resetBtn.className = 'btn-reset';
-        resetBtn.onclick = function() {
-            if (forgotPasswordLink) {
-                forgotPasswordLink.click(); // This triggers the B2C forgot password logic
-            } else {
-                console.error("B2C Forgot Password link not found.");
-            }
-        };
+        // If user already clicked "Sign In with Credentials", don't hide fields again
+        if (userInteracted) {
+            const existingContainer = document.getElementById('custom-action-container');
+            if (existingContainer) existingContainer.remove();
+            return;
+        }
 
-        // 4. Create "Sign In with Existing Credentials" Button
-        const showLoginBtn = document.createElement('button');
-        showLoginBtn.innerText = 'Sign In with Existing Credentials';
-        showLoginBtn.className = 'btn-outline';
-        showLoginBtn.onclick = function() {
-            // Show original fields
-            if (emailContainer) emailContainer.classList.remove('hidden-ui');
-            if (passwordContainer) passwordContainer.classList.remove('hidden-ui');
-            if (signInButton) signInButton.classList.remove('hidden-ui');
-            // Hide custom buttons
-            container.classList.add('hidden-ui');
-        };
+        // 2. Create the Custom Button Container (only if it doesn't exist)
+        let container = document.getElementById('custom-action-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'custom-action-container';
+            container.className = 'custom-btn-container';
 
-        // 5. Initial State: Hide original fields & button, then show our buttons
-        if (emailContainer) emailContainer.classList.add('hidden-ui');
-        if (passwordContainer) passwordContainer.classList.add('hidden-ui');
-        if (signInButton) signInButton.classList.add('hidden-ui');
+            const resetBtn = document.createElement('button');
+            resetBtn.innerText = 'Reset My Password';
+            resetBtn.className = 'btn-reset';
+            resetBtn.type = 'button';
+            resetBtn.onclick = function() {
+                if (forgotPasswordLink) {
+                    // Once clicked, we are leaving this page, remove buttons
+                    container.remove(); 
+                    forgotPasswordLink.click();
+                }
+            };
 
-        container.appendChild(resetBtn);
-        container.appendChild(showLoginBtn);
-        
-        // Append to the bottom of the API div
-        apiDiv.appendChild(container);
+            const showLoginBtn = document.createElement('button');
+            showLoginBtn.innerText = 'Sign In with Existing Credentials';
+            showLoginBtn.className = 'btn-outline';
+            showLoginBtn.type = 'button';
+            showLoginBtn.onclick = function() {
+                userInteracted = true; // Set flag so they don't come back
+                if (emailContainer) emailContainer.classList.remove('hidden-ui');
+                if (passwordContainer) passwordContainer.classList.remove('hidden-ui');
+                if (signInButton) signInButton.classList.remove('hidden-ui');
+                container.remove(); // Delete buttons from DOM
+            };
+
+            container.appendChild(resetBtn);
+            container.appendChild(showLoginBtn);
+            apiDiv.appendChild(container);
+        }
+
+        // 3. Initial State Logic: Hide original fields while buttons exist
+        if (!userInteracted) {
+            if (emailContainer) emailContainer.classList.add('hidden-ui');
+            if (passwordContainer) passwordContainer.classList.add('hidden-ui');
+            if (signInButton) signInButton.classList.add('hidden-ui');
+        }
     }
-
-    // Run on load and keep checking as B2C loads dynamically
-    const observer = new MutationObserver(initializeCustomFlow);
-    const target = document.getElementById('api');
-    if (target) {
-        observer.observe(target, { childList: true, subtree: true });
-    }
-    
-    // Safety interval for slower connections
-    setInterval(initializeCustomFlow, 500);
-})();
         
 (function() {
 console.log("ABO Debug: Script Initialized");
@@ -291,6 +307,7 @@ manageUI();
 
 </body>
 </html>
+
 
 
 
