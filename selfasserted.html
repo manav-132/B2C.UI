@@ -112,11 +112,86 @@
         margin: 10px 0;
         text-decoration: underline;
     }
+        .custom-button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.btn-secondary {
+    background-color: #f0f4f8 !important;
+    color: #2e71ca !important;
+    border: 1px solid #2e71ca !important;
+}
+
+.hidden-element {
+    display: none !important;
+}
 </style>
     <script>
+        function setupCustomButtons() {
+    const apiDiv = document.getElementById('api');
+    if (!apiDiv) return;
+
+    // Check if we've already added our custom buttons to prevent duplicates
+    if (document.getElementById('custom-ui-container')) return;
+
+    // 1. Identify existing elements
+    const emailField = document.querySelector('.entry-item:has(#email), #email');
+    const passwordField = document.querySelector('.entry-item:has(#password), #password');
+    const signInBtn = document.getElementById('next') || document.getElementById('continue');
+    const forgotPwdLink = document.getElementById('forgotPassword');
+
+    // 2. Create Container for new buttons
+    const container = document.createElement('div');
+    container.id = 'custom-ui-container';
+    container.className = 'custom-button-container';
+
+    // 3. Create "Reset Password" Button
+    const resetBtn = document.createElement('button');
+    resetBtn.innerText = 'Reset My Password';
+    resetBtn.type = 'button';
+    resetBtn.onclick = function() {
+        if (forgotPwdLink) forgotPwdLink.click();
+    };
+
+    // 4. Create "Sign In with Password" Button
+    const showFieldsBtn = document.createElement('button');
+    showFieldsBtn.innerText = 'Sign In with Existing Credentials';
+    showFieldsBtn.type = 'button';
+    showFieldsBtn.className = 'btn-secondary';
+    showFieldsBtn.onclick = function() {
+        // Show fields, hide these buttons
+        [emailField, passwordField, signInBtn].forEach(el => {
+            if (el) el.closest('li')?.classList.remove('hidden-element') || el.classList.remove('hidden-element');
+        });
+        container.style.display = 'none';
+    };
+
+    // 5. Initial State: Hide original fields and add buttons
+    [emailField, passwordField, signInBtn].forEach(el => {
+        if (el) {
+            // We target the parent 'li' if it exists to hide labels too
+            const parent = el.closest('li') || el;
+            parent.classList.add('hidden-element');
+        }
+    });
+
+    // 6. Assemble and Inject
+    container.appendChild(resetBtn);
+    container.appendChild(showFieldsBtn);
+    apiDiv.appendChild(container);
+}
+
+// Add this call inside your existing MutationObserver/Interval logic
+// Inside your current manageUI() function, add:
+// setupCustomButtons();
+        
 (function() {
 console.log("ABO Debug: Script Initialized");
 function manageUI() {
+     setupCustomButtons();
     const continueBtn = document.getElementById('continue');
     if (!continueBtn) return;
 
@@ -167,6 +242,9 @@ if (apiTarget) {
     observer.observe(apiTarget, { childList: true, subtree: true, attributes: true });
 }
 
+
+
+
 // Safety net interval
 setInterval(manageUI, 500);
 
@@ -186,6 +264,7 @@ manageUI();
 
 </body>
 </html>
+
 
 
 
