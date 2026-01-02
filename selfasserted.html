@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- LAYOUT & CARD --- */
+        /* --- ALL YOUR ORIGINAL CSS KEPT AS IS --- */
         body {
             background-color: #f8f9fa;
             font-family: 'Open Sans', sans-serif;
@@ -16,285 +16,193 @@
             min-height: 100vh;
             margin: 0;
         }
-.master-card {
-        background-color: #ffffff;
-        width: 100%;
-        max-width: 460px;
-        padding: 40px;
-        border-radius: 12px;
-        border: 1px solid #e1e4e8;
-        box-sizing: border-box;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    }
-    .heading {
-        display: none;
-    }
-    .h1 {
-        display: none;
-    }
-    .intro p{
-         display: none !important ;
-    }
-    h2 {
-        font-size: 1rem !important;
-        font-weight: 400 !important;
-    }
-    .logo-container { text-align: center; margin-bottom: 30px; }
-    .logo-container img { max-width: 220px; height: auto; }
+        .master-card {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 460px;
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid #e1e4e8;
+            box-sizing: border-box;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        .heading, .h1 { display: none; }
+        .intro p { display: none !important; }
+        h2 { font-size: 1rem !important; font-weight: 400 !important; }
+        .logo-container { text-align: center; margin-bottom: 30px; }
+        .logo-container img { max-width: 220px; height: auto; }
 
-    /* --- TYPOGRAPHY --- */
-    h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
-    .intro p { display: none !important; font-size: 14px !important; font-weight: 600 !important; line-height: 1.5 !important; margin-bottom: 20px !important; }
+        h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
 
-    /* --- FORM ALIGNMENT (Fixes Indentation) --- */
-    ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
-    li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
-    
-    input {
-        width: 100% !important;
-        padding: 12px !important;
-        border: 1.5px solid #333 !important;
-        border-radius: 8px !important;
-        box-sizing: border-box !important;
-        margin-top: 5px;
-    }
+        ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
+        li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
+        
+        input {
+            width: 100% !important;
+            padding: 12px !important;
+            border: 1.5px solid #333 !important;
+            border-radius: 8px !important;
+            box-sizing: border-box !important;
+            margin-top: 5px;
+        }
 
-    button {
-        width: 100% !important;
-        padding: 14px !important;
-        background-color: #2e71ca !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-        margin-top: 15px !important;
-        cursor: pointer !important;
-    }
-    div#verifying_blurb{
-        display:none !important;
-    }
-    div#claimVerificationServerError {
-    display: none !important;
-}
-        .error.itemLevel.show {
-    color: red;
-}
-        .error.itemLevel {
-    color: red;
-}
-        .error.pageLevel {
-    color: red;
-    margin-bottom: 10px !important;
-}
-    /* --- BUTTON VISIBILITY LOGIC --- */
-    
-    /* Instead of !important hide, we use a class that JS can control */
-    .hide-button {
-        display: none !important;
-    
-    }
-    div#email_fail_retry {
-    color: red;
-}
-    label#email_label {
-        margin-top: 20px !important;
-        display: inline-block;
-    }
-    /* Elements to always hide */
-    #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { 
-        display: none !important; 
-    }
+        button {
+            width: 100% !important;
+            padding: 14px !important;
+            background-color: #2e71ca !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            margin-top: 15px !important;
+            cursor: pointer !important;
+        }
+        div#verifying_blurb, div#claimVerificationServerError { display: none !important; }
+        .error.itemLevel.show, .error.itemLevel { color: red; }
+        .error.pageLevel { color: red; margin-bottom: 10px !important; }
+        .hide-button { display: none !important; }
+        div#email_fail_retry { color: red; }
+        label#email_label { margin-top: 20px !important; display: inline-block; }
+        #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { display: none !important; }
 
-    #forgotPassword {
-        display: inline-block !important;
-        color: #2e71ca;
-        font-size: 14px;
-        margin: 10px 0;
-        text-decoration: underline;
-    }
-       /* Custom Styles for Toggle */
-/* Custom Styles for Toggle */
-.hidden-ui {
-    display: none !important;
-}
+        #forgotPassword {
+            display: inline-block !important;
+            color: #2e71ca;
+            font-size: 14px;
+            margin: 10px 0;
+            text-decoration: underline;
+        }
 
-#custom-action-container.hidden-permanently {
-    display: none !important;
-}
+        /* --- TOGGLE BUTTON STYLES --- */
+        .hidden-ui { display: none !important; }
 
-.custom-btn-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
-}
+        .custom-btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
 
-.btn-reset {
-    width: 100% !important;
-    padding: 14px !important;
-    background-color: #2e71ca !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-}
+        .btn-reset {
+            width: 100% !important;
+            padding: 14px !important;
+            background-color: #2e71ca !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+        }
 
-.btn-outline {
-    width: 100% !important;
-    padding: 14px !important;
-    background-color: transparent !important;
-    color: #2e71ca !important;
-    border: 1px solid #2e71ca !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    margin-top: 10px !important;
-}
-</style>
+        .btn-outline {
+            width: 100% !important;
+            padding: 14px !important;
+            background-color: transparent !important;
+            color: #2e71ca !important;
+            border: 1px solid #2e71ca !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            margin-top: 10px !important;
+        }
+    </style>
+
     <script>
-        (function() {
-    let userInteracted = false;
+    (function() {
+        // State flag to track user interaction across DOM updates
+        let userHasClickedSignIn = false;
 
-    function handleCustomFlow() {
-        const apiDiv = document.getElementById('api');
-        if (!apiDiv) return;
+        function runUnifiedUI() {
+            const api = document.getElementById('api');
+            if (!api) return;
 
-        // 1. Identify B2C Elements
-        const emailField = document.getElementById('email');
-        const passwordField = document.getElementById('password');
-        const emailContainer = emailField ? (emailField.closest('li') || emailField.parentElement) : null;
-        const passwordContainer = passwordField ? (passwordField.closest('li') || passwordField.parentElement) : null;
-        const signInButton = document.getElementById('next') || document.querySelector('button#continue');
-        const forgotPasswordLink = document.getElementById('forgotPassword');
+            // 1. Identify Key Elements
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            const forgotLink = document.getElementById('forgotPassword');
+            const continueBtn = document.getElementById('next') || document.getElementById('continue');
+            
+            // Parent containers to hide labels
+            const emailContainer = emailField ? (emailField.closest('li') || emailField.parentElement) : null;
+            const passwordContainer = passwordField ? (passwordField.closest('li') || passwordField.parentElement) : null;
 
-        // Only proceed with button logic if we are on the SIGN-IN page 
-        // (Identified by presence of both email and password fields)
-        const isLoginPage = emailField && passwordField;
+            // Page detection logic
+            const isLoginScreen = !!(emailField && passwordField);
 
-        if (!isLoginPage) {
-            // We are on a different page (like Reset Password or Verification)
-            // Remove our custom buttons if they exist
-            const existingContainer = document.getElementById('custom-action-container');
-            if (existingContainer) existingContainer.remove();
-            return;
-        }
+            // 2. Logic for Initial Buttons
+            if (isLoginScreen && !userHasClickedSignIn) {
+                // Hide original fields
+                if (emailContainer) emailContainer.classList.add('hidden-ui');
+                if (passwordContainer) passwordContainer.classList.add('hidden-ui');
+                if (continueBtn) continueBtn.classList.add('hidden-ui');
 
-        // If user already clicked "Sign In with Credentials", don't hide fields again
-        if (userInteracted) {
-            const existingContainer = document.getElementById('custom-action-container');
-            if (existingContainer) existingContainer.remove();
-            return;
-        }
+                // Create custom buttons if they don't exist
+                let customBox = document.getElementById('custom-action-container');
+                if (!customBox) {
+                    customBox = document.createElement('div');
+                    customBox.id = 'custom-action-container';
+                    customBox.className = 'custom-btn-container';
+                    customBox.innerHTML = `
+                        <button type="button" class="btn-reset" id="act-reset">Reset My Password</button>
+                        <button type="button" class="btn-outline" id="act-signin">Sign In with Existing Credentials</button>
+                    `;
+                    api.appendChild(customBox);
 
-        // 2. Create the Custom Button Container (only if it doesn't exist)
-        let container = document.getElementById('custom-action-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'custom-action-container';
-            container.className = 'custom-btn-container';
+                    document.getElementById('act-reset').onclick = function() {
+                        if (forgotLink) {
+                            customBox.remove(); // Clean up before switching
+                            forgotLink.click();
+                        }
+                    };
 
-            const resetBtn = document.createElement('button');
-            resetBtn.innerText = 'Reset My Password';
-            resetBtn.className = 'btn-reset';
-            resetBtn.type = 'button';
-            resetBtn.onclick = function() {
-                if (forgotPasswordLink) {
-                    // Once clicked, we are leaving this page, remove buttons
-                    container.remove(); 
-                    forgotPasswordLink.click();
+                    document.getElementById('act-signin').onclick = function() {
+                        userHasClickedSignIn = true; // Set state
+                        customBox.remove(); // Delete buttons
+                        runUnifiedUI(); // Immediate refresh to show fields
+                    };
                 }
-            };
+            } 
+            else {
+                // CASE: User clicked sign-in OR we moved to a different page (Verification/Reset)
+                
+                // Remove custom buttons if they are lingering
+                const customBox = document.getElementById('custom-action-container');
+                if (customBox) customBox.remove();
 
-            const showLoginBtn = document.createElement('button');
-            showLoginBtn.innerText = 'Sign In with Existing Credentials';
-            showLoginBtn.className = 'btn-outline';
-            showLoginBtn.type = 'button';
-            showLoginBtn.onclick = function() {
-                userInteracted = true; // Set flag so they don't come back
+                // Show original fields
                 if (emailContainer) emailContainer.classList.remove('hidden-ui');
                 if (passwordContainer) passwordContainer.classList.remove('hidden-ui');
-                if (signInButton) signInButton.classList.remove('hidden-ui');
-                container.remove(); // Delete buttons from DOM
-            };
 
-            container.appendChild(resetBtn);
-            container.appendChild(showLoginBtn);
-            apiDiv.appendChild(container);
+                // Special handling for the Continue button (Verification screens)
+                if (continueBtn) {
+                    const isVerificationPage = (emailField && !passwordField);
+                    const successMsg = document.getElementById('email_success');
+                    
+                    if (isVerificationPage) {
+                        const isVerified = !!(successMsg && successMsg.offsetParent !== null);
+                        continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
+                    } else {
+                        continueBtn.classList.remove('hidden-ui');
+                        continueBtn.style.setProperty('display', 'block', 'important');
+                    }
+                }
+            }
         }
 
-        // 3. Initial State Logic: Hide original fields while buttons exist
-        if (!userInteracted) {
-            if (emailContainer) emailContainer.classList.add('hidden-ui');
-            if (passwordContainer) passwordContainer.classList.add('hidden-ui');
-            if (signInButton) signInButton.classList.add('hidden-ui');
+        // Standard B2C Observer to handle dynamic content loads
+        const observer = new MutationObserver(runUnifiedUI);
+        const target = document.getElementById('api');
+        if (target) {
+            observer.observe(target, { childList: true, subtree: true, attributes: true });
         }
-    }
-        
-(function() {
-console.log("ABO Debug: Script Initialized");
-function manageUI() {
-     handleCustomFlow();
-    const continueBtn = document.getElementById('continue');
-    if (!continueBtn) return;
 
-    // 1. Check if an email verification control exists on THIS specific page
-    // B2C usually puts the verification elements inside a container or uses these IDs
-    const emailInput = document.getElementById('email');
-    const verificationControl = document.getElementById('email_ver_control') || document.querySelector('.verificationControlLayout');
-    
-    // 2. Identify the verification state elements
-    const sendBtn = document.getElementById('email_ver_but_send');
-    const verifyBtn = document.getElementById('email_ver_but_verify');
-    const successMsg = document.getElementById('email_success');
+        // Safety interval backup
+        setInterval(runUnifiedUI, 500);
 
-    function isVisible(el) {
-        return !!(el && el.offsetParent !== null);
-    }
-
-    const hasEmailVerificationOnPage = !!(emailInput || verificationControl || sendBtn);
-    const isVerifying = isVisible(sendBtn) || isVisible(verifyBtn);
-    const isVerified = isVisible(successMsg);
-
-    // --- NEW LOGIC ---
-
-    if (!hasEmailVerificationOnPage) {
-        // CASE A: This is a screen like "New Password" where no email verification is needed.
-        // Ensure the button is VISIBLE.
-        console.log("ABO Debug: No verification control found. Showing button for standard form.");
-        continueBtn.style.setProperty('display', 'block', 'important');
-        continueBtn.style.setProperty('visibility', 'visible', 'important');
-    } 
-    else if (isVerified) {
-        // CASE B: Email verification is present and SUCCESSFUL.
-        console.log("ABO Debug: Verification Successful. Showing button.");
-        continueBtn.style.setProperty('display', 'block', 'important');
-        continueBtn.style.setProperty('visibility', 'visible', 'important');
-    } 
-    else {
-        // CASE C: Email verification is present but NOT finished.
-        console.log("ABO Debug: Verification in progress/required. Hiding button.");
-        continueBtn.style.setProperty('display', 'none', 'important');
-    }
-}
-
-// Standard B2C Observers
-const observer = new MutationObserver(manageUI);
-const apiTarget = document.getElementById('api');
-if (apiTarget) {
-    observer.observe(apiTarget, { childList: true, subtree: true, attributes: true });
-}
-
-
-
-
-// Safety net interval
-setInterval(manageUI, 500);
-
-// Initial run
-manageUI();
-})();
-</script>
+        // Initial trigger
+        runUnifiedUI();
+    })();
+    </script>
 </head>
 <body>
     <div class="master-card">
@@ -303,16 +211,5 @@ manageUI();
         </div>
         <div id="api"></div>
     </div>
-
-
 </body>
 </html>
-
-
-
-
-
-
-
-
-
