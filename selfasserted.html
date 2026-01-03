@@ -12,7 +12,7 @@
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
         
-        /* Always hide these standard B2C items */
+        /* Always hide standard B2C clutter */
         .heading, .h1, .intro p, #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny, div#verifying_blurb, div#claimVerificationServerError { display: none !important; }
         
         h2 { font-size: 1rem !important; font-weight: 400 !important; }
@@ -24,16 +24,14 @@
 
         #forgotPassword { display: none !important; }
 
-        /* --- VISIBILITY CLASSES --- */
+        /* --- VISIBILITY CONTROL --- */
         .hidden-ui { display: none !important; }
         
-        /* API hidden by default */
+        /* API hidden until needed */
         #api { display: none; }
         #api.show-api { display: block !important; }
 
-        /* Buttons VISIBLE by default to prevent blank screen */
         .custom-btn-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-        
         .btn-outline { background-color: transparent !important; color: #2e71ca !important; border: 1px solid #2e71ca !important; }
     </style>
 
@@ -46,34 +44,34 @@
             var emailInput = document.getElementById('email');
             var passwordInput = document.getElementById('password');
             
-            // 1. Check if the user has EVER clicked a button in this session
+            // 1. Detect Journey State
             var journeyStarted = sessionStorage.getItem('abo_journey_started') === 'true';
-
-            // 2. Identify screens
             var isApiEmpty = apiDiv.innerHTML.trim() === "";
-            var isLoginScreen = !!(emailInput && passwordInput);
             
+            // 2. Detect "Reset Mode" (Email field exists, but Password field is GONE)
+            // This is the key to preventing buttons on refresh during reset.
+            var isResetJourney = !!(emailInput && !passwordInput);
+
             // 3. DECISION LOGIC
-            if (journeyStarted) {
-                // JOURNEY HAS STARTED (Refresh or Clicked): Show API, hide buttons
+            if (isResetJourney || journeyStarted) {
+                // If we are in any secondary screen or user clicked a button, hide custom UI
                 customButtons.classList.add('hidden-ui');
                 apiDiv.classList.add('show-api');
-            } else {
-                // JOURNEY NOT STARTED: Show buttons
-                if (isLoginScreen || isApiEmpty) {
-                    customButtons.classList.remove('hidden-ui');
-                    apiDiv.classList.remove('show-api');
-                } else {
-                    // This handles MFA/Other screens that load automatically
-                    // If it's NOT a login screen and NOT empty, force API view
-                    customButtons.classList.add('hidden-ui');
-                    apiDiv.classList.add('show-api');
-                }
+            } 
+            else if (isApiEmpty || (emailInput && passwordInput)) {
+                // We are on the very first landing screen
+                customButtons.classList.remove('hidden-ui');
+                apiDiv.classList.remove('show-api');
+            } 
+            else {
+                // Safety: Fallback for any other screen type
+                customButtons.classList.add('hidden-ui');
+                apiDiv.classList.add('show-api');
             }
 
             // 4. Handle "Continue" button on verification screens
             var continueBtn = document.getElementById('continue') || document.getElementById('next');
-            if (continueBtn && !isLoginScreen) {
+            if (continueBtn && !passwordInput) {
                 var verificationControl = document.querySelector('.verificationControlLayout') || document.getElementById('email_ver_control');
                 var successMsg = document.getElementById('email_success');
                 var isVerifying = verificationControl && (verificationControl.offsetWidth > 0 || verificationControl.offsetHeight > 0);
@@ -87,14 +85,27 @@
             }
         }
 
+        // --- NEW RESET HANDLER (Fixes Double Click) ---
         function handleResetClick() {
             sessionStorage.setItem('abo_journey_started', 'true');
-            var forgot = document.getElementById('forgotPassword');
-            if (forgot) {
-                forgot.click();
-            } else {
-                updateVisibility();
-            }
+            
+            // Force UI to show API immediately
+            document.getElementById('custom-action-container').classList.add('hidden-ui');
+            document.getElementById('api').classList.add('show-api');
+
+            // Wait/Poll for the forgotPassword link to appear and then click it
+            var pollCount = 0;
+            var pollInterval = setInterval(function() {
+                var forgot = document.getElementById('forgotPassword');
+                pollCount++;
+                
+                if (forgot) {
+                    forgot.click();
+                    clearInterval(pollInterval);
+                } else if (pollCount > 20) { // Stop after 4 seconds
+                    clearInterval(pollInterval);
+                }
+            }, 200);
         }
 
         function handleSignInClick() {
@@ -118,7 +129,6 @@
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
 
-        <!-- Buttons are visible by default now -->
         <div id="custom-action-container" class="custom-btn-container">
             <button class="btn-reset" onclick="handleResetClick()">Reset My Password</button>
             <button class="btn-outline" onclick="handleSignInClick()">Sign In with Existing Credentials</button>
