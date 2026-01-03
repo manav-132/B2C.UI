@@ -30,7 +30,7 @@
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
 
-        /* Hiding B2C clutter (Intro text, original headings, and original links) */
+        /* Hiding B2C clutter */
         .heading, .h1, .intro, .intro p, #forgotPassword { 
             display: none !important; 
         }
@@ -68,15 +68,12 @@
         label#email_label { margin-top: 20px !important; display: inline-block; }
         #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { display: none !important; }
         
-        /* --- CUSTOM UI STYLES --- */
-        .hidden-ui { display: none !important; }
+        /* --- CUSTOM UI DISPLAY LOGIC --- */
+        #api { display: none; } /* Hidden by default */
+        #api.show-api { display: block !important; }
 
-        .custom-btn-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
+        #custom-action-container { display: none; } /* Hidden until JS confirms landing screen */
+        #custom-action-container.show-landing { display: flex !important; flex-direction: column; gap: 15px; margin-top: 20px; }
 
         .btn-outline {
             background-color: transparent !important;
@@ -85,7 +82,7 @@
             margin-top: 10px !important;
         }
 
-        /* Loader Overlay */
+        /* Loader Spinner Overlay */
         #custom-loader {
             display: none;
             position: absolute;
@@ -107,111 +104,89 @@
 
     <script>
     (function() {
-        // Track journey state in sessionStorage to survive refreshes
+        // Persistent flag for the current session
         let journeyStarted = sessionStorage.getItem('abo_journey_started') === 'true';
 
-        function runUnifiedUI() {
+        function updateUI() {
             const api = document.getElementById('api');
+            const customBox = document.getElementById('custom-action-container');
             const loader = document.getElementById('custom-loader');
-            if (!api) return;
+            if (!api || !customBox) return;
 
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
             const continueBtn = document.getElementById('next') || document.getElementById('continue');
-            const b2cEntryItems = document.querySelectorAll('.entry-item, .attrEntry, .verificationControlLayout');
 
-            // Identify the Login Screen (presence of both email and password)
+            // Determine screen type
             const isLoginScreen = !!(emailField && passwordField);
 
-            // 1. CASE: INITIAL LANDING SCREEN
+            // 1. LANDING SCREEN LOGIC (Only if not started and on login fields)
             if (isLoginScreen && !journeyStarted) {
-                // Hide original B2C elements
-                b2cEntryItems.forEach(item => item.classList.add('hidden-ui'));
-                if (continueBtn) continueBtn.classList.add('hidden-ui');
-
-                // Create and show custom landing buttons
-                let customBox = document.getElementById('custom-action-container');
-                if (!customBox) {
-                    customBox = document.createElement('div');
-                    customBox.id = 'custom-action-container';
-                    customBox.className = 'custom-btn-container';
-                    customBox.innerHTML = `
-                        <button type="button" id="act-reset">Reset My Password</button>
-                        <button type="button" class="btn-outline" id="act-signin">Sign In with Existing Credentials</button>
-                    `;
-                    api.appendChild(customBox);
-
-                    // --- RESET PASSWORD LOGIC ---
-                    document.getElementById('act-reset').onclick = function() {
-                        sessionStorage.setItem('abo_journey_started', 'true');
-                        journeyStarted = true;
-                        if (loader) loader.style.display = 'flex';
-                        
-                        // Poll for the hidden B2C "Forgot your password?" link and click it
-                        let attempts = 0;
-                        const pollInterval = setInterval(() => {
-                            const hiddenLink = document.getElementById('forgotPassword');
-                            if (hiddenLink) {
-                                clearInterval(pollInterval);
-                                hiddenLink.click();
-                            }
-                            if (++attempts > 50) clearInterval(pollInterval); // Timeout after 7.5s
-                        }, 150);
-                    };
-
-                    // --- SIGN IN LOGIC ---
-                    document.getElementById('act-signin').onclick = function() {
-                        sessionStorage.setItem('abo_journey_started', 'true');
-                        journeyStarted = true;
-                        customBox.remove();
-                        runUnifiedUI(); // Immediate refresh to show fields
-                    };
-                }
+                customBox.classList.add('show-landing');
+                api.classList.remove('show-api');
             } 
-            // 2. CASE: JOURNEY IN PROGRESS (User clicked button or refreshed during flow)
+            // 2. JOURNEY LOGIC (Refresh or started)
             else {
-                // Remove custom buttons
-                const customBox = document.getElementById('custom-action-container');
-                if (customBox) customBox.remove();
+                customBox.classList.remove('show-landing');
+                api.classList.add('show-api');
 
-                // Reveal original B2C fields
-                b2cEntryItems.forEach(item => item.classList.remove('hidden-ui'));
-
-                // Handle Continue/Sign-in Button Visibility
+                // Continue Button Logic for Verification Screens
                 if (continueBtn) {
-                    const isVerificationScreen = (emailField && !passwordField);
+                    const isVerificationPage = (emailField && !passwordField);
                     const successMsg = document.getElementById('email_success');
                     
-                    if (isVerificationScreen) {
-                        // On email verification pages, only show "Continue" once verified
+                    if (isVerificationPage) {
                         const isVerified = !!(successMsg && successMsg.offsetParent !== null);
                         continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
                     } else {
-                        // On password entry or password reset pages, show it
-                        continueBtn.classList.remove('hidden-ui');
                         continueBtn.style.setProperty('display', 'block', 'important');
                     }
                 }
 
-                // Hide loader once the new B2C screen content renders
+                // Hide loader once B2C renders
                 if (loader && api.innerText.trim().length > 10) {
                     loader.style.display = 'none';
                 }
             }
         }
 
-        // MutationObserver to watch for Azure B2C's dynamic HTML changes
-        const observer = new MutationObserver(runUnifiedUI);
-        const target = document.getElementById('api');
-        if (target) {
-            observer.observe(target, { childList: true, subtree: true, attributes: true });
-        }
+        // --- BUTTON HANDLERS ---
+        window.handleReset = function() {
+            sessionStorage.setItem('abo_journey_started', 'true');
+            journeyStarted = true;
+            document.getElementById('custom-loader').style.display = 'flex';
+            
+            // Show API so script can find the hidden link
+            document.getElementById('api').classList.add('show-api');
+            document.getElementById('custom-action-container').classList.remove('show-landing');
 
-        // Safety backup for edge cases
-        setInterval(runUnifiedUI, 500);
+            let attempts = 0;
+            const poll = setInterval(() => {
+                const link = document.getElementById('forgotPassword');
+                if (link) {
+                    clearInterval(poll);
+                    link.click();
+                }
+                if (++attempts > 40) clearInterval(poll);
+            }, 150);
+        };
 
-        // Initial execution
-        runUnifiedUI();
+        window.handleSignIn = function() {
+            sessionStorage.setItem('abo_journey_started', 'true');
+            journeyStarted = true;
+            updateUI();
+        };
+
+        // Initialize Observer
+        const observer = new MutationObserver(updateUI);
+        document.addEventListener("DOMContentLoaded", () => {
+            const target = document.getElementById('api');
+            if (target) {
+                observer.observe(target, { childList: true, subtree: true, attributes: true });
+            }
+            setInterval(updateUI, 500);
+            updateUI();
+        });
     })();
     </script>
 </head>
@@ -226,7 +201,13 @@
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
 
-        <!-- B2C dynamic content container -->
+        <!-- LANDING BUTTONS (Outside API) -->
+        <div id="custom-action-container">
+            <button type="button" class="btn-reset" onclick="handleReset()">Reset My Password</button>
+            <button type="button" class="btn-outline" onclick="handleSignIn()">Sign In with Existing Credentials</button>
+        </div>
+
+        <!-- B2C API DIV -->
         <div id="api"></div>
     </div>
 </body>
