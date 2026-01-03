@@ -109,9 +109,6 @@
 
     <script>
     (function() {
-        // State flag to track user interaction across DOM updates
-        let userHasClickedSignIn = false;
-
         function runUnifiedUI() {
             const api = document.getElementById('api');
             if (!api) return;
@@ -119,24 +116,25 @@
             // 1. Identify Key Elements
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
-            const forgotLink = document.getElementById('forgotPassword');
+            const forgotLink = document.getElementById('forgotPassword') || document.querySelector('a[href*="forgotPassword"]');
             const continueBtn = document.getElementById('next') || document.getElementById('continue');
             
-            // Parent containers to hide labels
+            // Parent containers to hide labels and inputs
             const emailContainer = emailField ? (emailField.closest('li') || emailField.parentElement) : null;
             const passwordContainer = passwordField ? (passwordField.closest('li') || passwordField.parentElement) : null;
 
-            // Page detection logic
+            // State detection
             const isLoginScreen = !!(emailField && passwordField);
+            const userHasOptedIn = sessionStorage.getItem('abo_signin_selected') === 'true';
 
-            // 2. Logic for Initial Buttons
-            if (isLoginScreen && !userHasClickedSignIn) {
-                // Hide original fields
-                if (emailContainer) emailContainer.classList.add('hidden-ui');
-                if (passwordContainer) passwordContainer.classList.add('hidden-ui');
-                if (continueBtn) continueBtn.classList.add('hidden-ui');
+            // 2. LOGIC FOR INITIAL BUTTONS
+            if (isLoginScreen && !userHasOptedIn) {
+                // Force-hide original fields to prevent flicker
+                if (emailContainer) emailContainer.style.setProperty('display', 'none', 'important');
+                if (passwordContainer) passwordContainer.style.setProperty('display', 'none', 'important');
+                if (continueBtn) continueBtn.style.setProperty('display', 'none', 'important');
 
-                // Create custom buttons if they don't exist
+                // Re-inject custom buttons if missing or hidden
                 let customBox = document.getElementById('custom-action-container');
                 if (!customBox) {
                     customBox = document.createElement('div');
@@ -148,41 +146,47 @@
                     `;
                     api.appendChild(customBox);
 
-                    document.getElementById('act-reset').onclick = function() {
+                    // RESET PASSWORD CLICK
+                    document.getElementById('act-reset').addEventListener('click', function(e) {
+                        e.preventDefault();
                         if (forgotLink) {
-                            customBox.remove(); // Clean up before switching
                             forgotLink.click();
+                        } else {
+                            console.error("ABO: Forgot Password link not found");
                         }
-                    };
+                    });
 
-                    document.getElementById('act-signin').onclick = function() {
-                        userHasClickedSignIn = true; // Set state
-                        customBox.remove(); // Delete buttons
-                        runUnifiedUI(); // Immediate refresh to show fields
-                    };
+                    // SIGN IN CLICK
+                    document.getElementById('act-signin').addEventListener('click', function(e) {
+                        e.preventDefault();
+                        sessionStorage.setItem('abo_signin_selected', 'true');
+                        customBox.remove();
+                        runUnifiedUI(); // Immediate UI refresh
+                    });
                 }
             } 
             else {
                 // CASE: User clicked sign-in OR we moved to a different page (Verification/Reset)
                 
-                // Remove custom buttons if they are lingering
+                // Remove custom buttons if they exist
                 const customBox = document.getElementById('custom-action-container');
                 if (customBox) customBox.remove();
 
-                // Show original fields
-                if (emailContainer) emailContainer.classList.remove('hidden-ui');
-                if (passwordContainer) passwordContainer.classList.remove('hidden-ui');
+                // Restore original fields visibility
+                if (emailContainer) emailContainer.style.display = '';
+                if (passwordContainer) passwordContainer.style.display = '';
 
-                // Special handling for the Continue button (Verification screens)
+                // Handle Continue button visibility (Crucial for B2C screens)
                 if (continueBtn) {
                     const isVerificationPage = (emailField && !passwordField);
                     const successMsg = document.getElementById('email_success');
                     
                     if (isVerificationPage) {
+                        // On verify page, only show Continue if email is verified
                         const isVerified = !!(successMsg && successMsg.offsetParent !== null);
                         continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
                     } else {
-                        continueBtn.classList.remove('hidden-ui');
+                        // Standard sign-in or other pages
                         continueBtn.style.setProperty('display', 'block', 'important');
                     }
                 }
@@ -190,13 +194,16 @@
         }
 
         // Standard B2C Observer to handle dynamic content loads
-        const observer = new MutationObserver(runUnifiedUI);
+        const observer = new MutationObserver(function() {
+            runUnifiedUI();
+        });
+
         const target = document.getElementById('api');
         if (target) {
-            observer.observe(target, { childList: true, subtree: true, attributes: true });
+            observer.observe(target, { childList: true, subtree: true });
         }
 
-        // Safety interval backup
+        // Safety interval (runs 2 times per second)
         setInterval(runUnifiedUI, 500);
 
         // Initial trigger
