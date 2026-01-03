@@ -77,7 +77,7 @@
     display: none !important;
 }
         .error.itemLevel.show {
-    display: none !important;
+    color: red;
 }
         .error.itemLevel {
     color: red;
@@ -112,11 +112,113 @@
         margin: 10px 0;
         text-decoration: underline;
     }
+       /* Custom Styles for Toggle */
+.hidden-ui {
+    display: none !important;
+}
+
+.custom-btn-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-reset {
+    width: 100%;
+    padding: 14px;
+    background-color: #2e71ca;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-outline {
+    width: 100%;
+    padding: 14px;
+    background-color: transparent;
+    color: #2e71ca;
+    border: 1px solid #2e71ca;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
 </style>
     <script>
+        (function() {
+    function initializeCustomFlow() {
+        const apiDiv = document.getElementById('api');
+        if (!apiDiv) return;
+
+        // 1. Identify B2C Elements
+        // We find the parent 'li' or 'div' to ensure labels are hidden too
+        const emailContainer = document.querySelector('.entry-item:has(#email)') || document.getElementById('email')?.parentElement;
+        const passwordContainer = document.querySelector('.entry-item:has(#password)') || document.getElementById('password')?.parentElement;
+        const signInButton = document.getElementById('next') || document.querySelector('button#continue');
+        const forgotPasswordLink = document.getElementById('forgotPassword');
+
+        // If we've already injected our buttons, don't do it again
+        if (document.getElementById('custom-action-container')) return;
+
+        // 2. Create the Custom Button Container
+        const container = document.createElement('div');
+        container.id = 'custom-action-container';
+        container.className = 'custom-btn-container';
+
+        // 3. Create "Reset My Password" Button
+        const resetBtn = document.createElement('button');
+        resetBtn.innerText = 'Reset My Password';
+        resetBtn.className = 'btn-reset';
+        resetBtn.onclick = function() {
+            if (forgotPasswordLink) {
+                forgotPasswordLink.click(); // This triggers the B2C forgot password logic
+            } else {
+                console.error("B2C Forgot Password link not found.");
+            }
+        };
+
+        // 4. Create "Sign In with Existing Credentials" Button
+        const showLoginBtn = document.createElement('button');
+        showLoginBtn.innerText = 'Sign In with Existing Credentials';
+        showLoginBtn.className = 'btn-outline';
+        showLoginBtn.onclick = function() {
+            // Show original fields
+            if (emailContainer) emailContainer.classList.remove('hidden-ui');
+            if (passwordContainer) passwordContainer.classList.remove('hidden-ui');
+            if (signInButton) signInButton.classList.remove('hidden-ui');
+            // Hide custom buttons
+            container.classList.add('hidden-ui');
+        };
+
+        // 5. Initial State: Hide original fields & button, then show our buttons
+        if (emailContainer) emailContainer.classList.add('hidden-ui');
+        if (passwordContainer) passwordContainer.classList.add('hidden-ui');
+        if (signInButton) signInButton.classList.add('hidden-ui');
+
+        container.appendChild(resetBtn);
+        container.appendChild(showLoginBtn);
+        
+        // Append to the bottom of the API div
+        apiDiv.appendChild(container);
+    }
+
+    // Run on load and keep checking as B2C loads dynamically
+    const observer = new MutationObserver(initializeCustomFlow);
+    const target = document.getElementById('api');
+    if (target) {
+        observer.observe(target, { childList: true, subtree: true });
+    }
+    
+    // Safety interval for slower connections
+    setInterval(initializeCustomFlow, 500);
+})();
+        
 (function() {
 console.log("ABO Debug: Script Initialized");
 function manageUI() {
+     setupCustomButtons();
     const continueBtn = document.getElementById('continue');
     if (!continueBtn) return;
 
@@ -167,6 +269,9 @@ if (apiTarget) {
     observer.observe(apiTarget, { childList: true, subtree: true, attributes: true });
 }
 
+
+
+
 // Safety net interval
 setInterval(manageUI, 500);
 
@@ -186,6 +291,9 @@ manageUI();
 
 </body>
 </html>
+
+
+
 
 
 
