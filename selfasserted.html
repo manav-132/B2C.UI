@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- ORIGINAL CSS PRESERVED --- */
+        /* --- ALL ORIGINAL CSS PRESERVED --- */
         body {
             background-color: #f8f9fa;
             font-family: 'Open Sans', sans-serif;
@@ -25,18 +25,13 @@
             border: 1px solid #e1e4e8;
             box-sizing: border-box;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            position: relative;
-            min-height: 350px;
         }
+        .heading, .h1 { display: none; }
+        .intro p { display: none !important; }
+        h2 { font-size: 1rem !important; font-weight: 400 !important; }
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
-
-        /* Hiding B2C clutter */
-        .heading, .h1, .intro, .intro p, #forgotPassword { 
-            display: none !important; 
-        }
-
-        h2 { font-size: 1rem !important; font-weight: 400 !important; }
+        h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
         ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
         li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
         
@@ -49,7 +44,7 @@
             margin-top: 5px;
         }
 
-        button {
+        button, #next, #continue {
             width: 100% !important;
             padding: 14px !important;
             background-color: #2e71ca !important;
@@ -61,7 +56,6 @@
             cursor: pointer !important;
         }
 
-        /* Verification Message Styles */
         div#verifying_blurb, div#claimVerificationServerError { display: none !important; }
         .error.itemLevel.show, .error.itemLevel { color: red; }
         .error.pageLevel { color: red; margin-bottom: 10px !important; }
@@ -69,153 +63,120 @@
         label#email_label { margin-top: 20px !important; display: inline-block; }
         #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { display: none !important; }
 
-        /* --- STABLE UI STATE CONTROL --- */
-        
-        /* Default: Buttons show, API hidden */
-        #custom-action-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-        #api { display: none; }
+        /* --- THE NEW CSS-ONLY BUTTON TRANSFORMATIONS --- */
 
-        /* When journey-active class is on body: Buttons hide, API shows */
-        body.journey-active #custom-action-container { display: none !important; }
-        body.journey-active #api { display: block !important; }
+        /* 1. Turn the standard "Forgot Password" link into a Primary Button */
+        #forgotPassword {
+            display: block !important;
+            width: 100% !important;
+            padding: 14px !important;
+            background-color: #2e71ca !important;
+            color: white !important;
+            text-align: center;
+            text-decoration: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        #forgotPassword:hover { background-color: #245ba3; }
 
-        .btn-outline {
+        /* 2. Style for the dynamically added Sign-In toggle button */
+        .btn-signin-toggle {
+            width: 100% !important;
+            padding: 14px !important;
             background-color: transparent !important;
             color: #2e71ca !important;
             border: 1px solid #2e71ca !important;
-            margin-top: 10px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            box-sizing: border-box;
         }
 
-        /* Intermediate Loader */
-        #custom-loader {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.9);
-            z-index: 100;
-            justify-content: center; align-items: center;
-            border-radius: 12px;
-        }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #2e71ca;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* 3. Logic to hide fields ONLY when 'initial-view' class is present */
+        .initial-view .entry-item { display: none !important; }
+        .initial-view #next, .initial-view #continue { display: none !important; }
+        
+        /* Ensure the Reset button stays visible even when fields are hidden */
+        .initial-view #forgotPassword { display: block !important; }
+
     </style>
 
     <script>
-        // 1. REFRESH PROTECTION: Runs instantly before page render
-        if (sessionStorage.getItem('abo_journey_active') === 'true') {
-            document.documentElement.classList.add('journey-active');
-        }
+    (function() {
+        function manageLoginScreen() {
+            const api = document.getElementById('api');
+            if (!api) return;
 
-        // 2. GLOBAL FUNCTIONS: Defined outside any scopes so buttons can see them immediately
-        window.handleReset = function() {
-            sessionStorage.setItem('abo_journey_active', 'true');
-            document.body.classList.add('journey-active');
-            const loader = document.getElementById('custom-loader');
-            if (loader) loader.style.display = 'flex';
-            
-            // Single-click polling logic
-            let attempts = 0;
-            const poll = setInterval(function() {
-                const link = document.getElementById('forgotPassword');
-                attempts++;
-                if (link) {
-                    clearInterval(poll);
-                    link.click();
-                } else if (attempts > 50) {
-                    clearInterval(poll);
-                    if (loader) loader.style.display = 'none';
-                }
-            }, 150);
-        };
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            const forgotLink = document.getElementById('forgotPassword');
 
-        window.handleSignIn = function() {
-            sessionStorage.setItem('abo_journey_active', 'true');
-            document.body.classList.add('journey-active');
-            const loader = document.getElementById('custom-loader');
-            if (loader) loader.style.display = 'flex';
-        };
+            // Detect if we are on the Login Screen
+            const isLoginScreen = !!(emailField && passwordField);
 
-        // 3. UI SYNC LOGIC
-        (function() {
-            function syncUI() {
-                const api = document.getElementById('api');
-                const loader = document.getElementById('custom-loader');
-                const body = document.body;
-                if (!api) return;
+            if (isLoginScreen) {
+                // Change the text of the existing B2C forgot password link
+                if (forgotLink) forgotLink.innerText = "Reset My Password";
 
-                // Sync the HTML-level refresh class to the body
-                if (document.documentElement.classList.contains('journey-active')) {
-                    body.classList.add('journey-active');
+                // Add the initial-view class if it's the first load
+                if (!api.classList.contains('initial-view') && !api.classList.contains('form-revealed')) {
+                    api.classList.add('initial-view');
                 }
 
-                const isJourney = body.classList.contains('journey-active');
-                const hasContent = api.innerText.trim().length > 10;
-                const emailField = document.getElementById('email');
-                const passwordField = document.getElementById('password');
-                const continueBtn = document.getElementById('next') || document.getElementById('continue');
-
-                if (isJourney) {
-                    // Hide loader once B2C renders content
-                    if (hasContent && loader) {
-                        loader.style.display = 'none';
-                    }
+                // Add our custom "Sign In" toggle button if it doesn't exist
+                if (!document.getElementById('custom-signin-toggle') && api.classList.contains('initial-view')) {
+                    const toggleBtn = document.createElement('button');
+                    toggleBtn.id = 'custom-signin-toggle';
+                    toggleBtn.type = 'button';
+                    toggleBtn.className = 'btn-signin-toggle';
+                    toggleBtn.innerText = 'Sign In with Existing Credentials';
                     
-                    // Continue button visibility logic
-                    if (continueBtn) {
-                        const isVerificationScreen = (emailField && !passwordField);
-                        const successMsg = document.getElementById('email_success');
-                        if (isVerificationScreen) {
-                            const isVerified = !!(successMsg && successMsg.offsetParent !== null);
-                            continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
-                        } else {
-                            continueBtn.style.setProperty('display', 'block', 'important');
-                        }
-                    }
-                } 
-                // Auto-detect if journey should start (e.g. B2C loads non-login page automatically)
-                else if (hasContent && api.querySelector('input') && !(emailField && passwordField)) {
-                    sessionStorage.setItem('abo_journey_active', 'true');
-                    body.classList.add('journey-active');
+                    toggleBtn.onclick = function() {
+                        api.classList.remove('initial-view');
+                        api.classList.add('form-revealed');
+                        this.remove(); // Remove this button once fields are shown
+                    };
+
+                    // Insert the button into the API div
+                    api.appendChild(toggleBtn);
+                }
+            } else {
+                // Not a login screen (e.g., verification or MFA)
+                // Remove all special classes so standard B2C logic works
+                api.classList.remove('initial-view');
+                const existingBtn = document.getElementById('custom-signin-toggle');
+                if (existingBtn) existingBtn.remove();
+                
+                // On verification screens, handle the Continue button visibility
+                const continueBtn = document.getElementById('next') || document.getElementById('continue');
+                const successMsg = document.getElementById('email_success');
+                if (continueBtn && emailField && !passwordField) {
+                    const isVerified = !!(successMsg && successMsg.offsetParent !== null);
+                    continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
                 }
             }
+        }
 
-            // Start observing
-            document.addEventListener("DOMContentLoaded", function() {
-                const api = document.getElementById('api');
-                if (api) {
-                    const observer = new MutationObserver(syncUI);
-                    observer.observe(api, { childList: true, subtree: true, attributes: true });
-                }
-                setInterval(syncUI, 500);
-                syncUI();
-            });
-        })();
+        // Run on every DOM change inside the API div
+        const observer = new MutationObserver(manageLoginScreen);
+        const target = document.getElementById('api');
+        if (target) {
+            observer.observe(target, { childList: true, subtree: true, attributes: true });
+        }
+
+        // Safety interval
+        setInterval(manageLoginScreen, 400);
+    })();
     </script>
 </head>
 <body>
     <div class="master-card">
-        <!-- Loader Spinner Overlay -->
-        <div id="custom-loader">
-            <div class="spinner"></div>
-        </div>
-
         <div class="logo-container">
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
-
-        <!-- LANDING BUTTONS -->
-        <div id="custom-action-container">
-            <button type="button" class="btn-reset" onclick="handleReset()">Reset My Password</button>
-            <button type="button" class="btn-outline" onclick="handleSignIn()">Sign In with Existing Credentials</button>
-        </div>
-
-        <!-- B2C API DIV -->
+        <!-- Everything happens inside this div now -->
         <div id="api"></div>
     </div>
 </body>
