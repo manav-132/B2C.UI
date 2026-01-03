@@ -26,6 +26,7 @@
             box-sizing: border-box;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             position: relative;
+            min-height: 300px;
         }
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
@@ -70,13 +71,12 @@
         
         /* --- CUSTOM UI DISPLAY LOGIC --- */
         
-        /* 1. API is hidden by default */
+        /* Hide everything by default so the loader is the first thing seen */
         #api { display: none; } 
         #api.show-api { display: block !important; }
 
-        /* 2. Custom Buttons are VISIBLE by default so they show during B2C load */
-        #custom-action-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-        #custom-action-container.hide-landing { display: none !important; }
+        #custom-action-container { display: none; flex-direction: column; gap: 15px; margin-top: 20px; }
+        #custom-action-container.show-landing { display: flex !important; }
 
         .btn-outline {
             background-color: transparent !important;
@@ -85,12 +85,12 @@
             margin-top: 10px !important;
         }
 
-        /* Loader Spinner Overlay */
+        /* Loader Spinner Overlay - Visible by default */
         #custom-loader {
-            display: none;
+            display: flex;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,1);
             z-index: 100;
             justify-content: center; align-items: center;
             border-radius: 12px;
@@ -107,50 +107,42 @@
 
     <script>
     (function() {
-        // Persistent flag for the current session
-        let journeyStarted = sessionStorage.getItem('abo_journey_started') === 'true';
+        // Source of truth: Has the user moved past the landing screen?
+        function isJourneyStarted() {
+            return sessionStorage.getItem('abo_journey_started') === 'true';
+        }
 
         function updateUI() {
             const api = document.getElementById('api');
             const customBox = document.getElementById('custom-action-container');
             const loader = document.getElementById('custom-loader');
+            
             if (!api || !customBox) return;
 
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
             const continueBtn = document.getElementById('next') || document.getElementById('continue');
 
-            // Detect if B2C has actually loaded something that isn't the login screen
-            // (e.g., if a user refreshes on an MFA page, journeyStarted will be true anyway)
-            const hasContent = api.innerText.trim().length > 10;
-            const isLoginScreen = !!(emailField && passwordField);
-
-            // 1. If journey hasn't started, stick to the landing buttons
-            if (!journeyStarted) {
-                // Special case: If B2C automatically loaded a non-login screen (rare), force show
-                if (hasContent && !isLoginScreen && api.querySelector('input')) {
-                    journeyStarted = true;
-                    sessionStorage.setItem('abo_journey_started', 'true');
-                    applyFlowUI();
-                } else {
-                    customBox.classList.remove('hide-landing');
-                    api.classList.remove('show-api');
-                }
-            } 
-            // 2. If journey started (clicked or refresh), show B2C
-            else {
-                applyFlowUI();
+            // 1. Wait until B2C has actually loaded content
+            const hasContent = api.innerText.trim().length > 10 || api.querySelector('input');
+            
+            if (!hasContent) {
+                // Keep showing loader until B2C is ready
+                loader.style.display = 'flex';
+                return;
             }
 
-            function applyFlowUI() {
-                customBox.classList.add('hide-landing');
+            // 2. Journey started check (Refresh or Clicked)
+            if (isJourneyStarted()) {
+                // Permanently hide landing buttons and show B2C
+                customBox.classList.remove('show-landing');
                 api.classList.add('show-api');
+                loader.style.display = 'none';
 
                 // Continue Button Logic for Verification Screens
                 if (continueBtn) {
                     const isVerificationPage = (emailField && !passwordField);
                     const successMsg = document.getElementById('email_success');
-                    
                     if (isVerificationPage) {
                         const isVerified = !!(successMsg && successMsg.offsetParent !== null);
                         continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
@@ -158,24 +150,36 @@
                         continueBtn.style.setProperty('display', 'block', 'important');
                     }
                 }
+                return;
+            }
 
-                // Hide loader once B2C renders content
-                if (loader && hasContent) {
-                    loader.style.display = 'none';
-                }
+            // 3. First time landing check
+            const isLoginScreen = !!(emailField && passwordField);
+
+            if (isLoginScreen) {
+                // Show landing buttons, hide B2C
+                customBox.classList.add('show-landing');
+                api.classList.remove('show-api');
+                loader.style.display = 'none';
+            } else {
+                // B2C loaded a different screen automatically (e.g. MFA / Password Reset directly)
+                // We treat this as "Journey Started"
+                sessionStorage.setItem('abo_journey_started', 'true');
+                updateUI(); // Re-run logic to apply "Journey Started" state
             }
         }
 
         // --- BUTTON HANDLERS ---
         window.handleReset = function() {
+            // Lock the journey state immediately
             sessionStorage.setItem('abo_journey_started', 'true');
-            journeyStarted = true;
-            document.getElementById('custom-loader').style.display = 'flex';
             
-            // Show API so script can find the hidden link
+            // UI Feedback
+            document.getElementById('custom-loader').style.display = 'flex';
+            document.getElementById('custom-action-container').classList.remove('show-landing');
             document.getElementById('api').classList.add('show-api');
-            document.getElementById('custom-action-container').classList.add('hide-landing');
 
+            // Find and click the hidden B2C link
             let attempts = 0;
             const poll = setInterval(() => {
                 const link = document.getElementById('forgotPassword');
@@ -189,17 +193,17 @@
 
         window.handleSignIn = function() {
             sessionStorage.setItem('abo_journey_started', 'true');
-            journeyStarted = true;
             updateUI();
         };
 
-        // Initialize Observer
+        // Initialize
         const observer = new MutationObserver(updateUI);
         document.addEventListener("DOMContentLoaded", () => {
             const target = document.getElementById('api');
             if (target) {
                 observer.observe(target, { childList: true, subtree: true, attributes: true });
             }
+            // Continuous check for dynamic B2C updates
             setInterval(updateUI, 500);
             updateUI();
         });
@@ -217,13 +221,13 @@
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
 
-        <!-- LANDING BUTTONS (Visible by default) -->
+        <!-- LANDING BUTTONS -->
         <div id="custom-action-container">
             <button type="button" class="btn-reset" onclick="handleReset()">Reset My Password</button>
             <button type="button" class="btn-outline" onclick="handleSignIn()">Sign In with Existing Credentials</button>
         </div>
 
-        <!-- B2C API DIV (Hidden by default) -->
+        <!-- B2C API DIV -->
         <div id="api"></div>
     </div>
 </body>
