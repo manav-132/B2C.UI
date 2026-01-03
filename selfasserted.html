@@ -218,12 +218,8 @@
 (function() {
 console.log("ABO Debug: Script Initialized");
 function manageUI() {
-     setupCustomButtons();
     const continueBtn = document.getElementById('continue');
     if (!continueBtn) return;
-
-    // 1. Check if an email verification control exists on THIS specific page
-    // B2C usually puts the verification elements inside a container or uses these IDs
     const emailInput = document.getElementById('email');
     const verificationControl = document.getElementById('email_ver_control') || document.querySelector('.verificationControlLayout');
     
@@ -291,7 +287,6 @@ manageUI();
 
 </body>
 </html>
-
 
 
 
