@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>American Board of Ophthalmology</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .master-card { background-color: #ffffff; width: 100%; max-width: 460px; padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+        .logo-container img { max-width: 220px; height: auto; margin-bottom: 30px; }
+        
+        /* Hide the default B2C UI (radio buttons and labels) */
+        #api .intro, #api .options, #api .attrEntry, #api .buttons { display: none; }
+
+        /* Custom Buttons styling to match image */
+        .custom-btn {
+            width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; transition: all 0.2s; box-sizing: border-box; display: block; text-decoration: none;
+        }
+        .btn-primary { background-color: #2e71ca; color: white; border: none; }
+        .btn-primary:hover { background-color: #245ba3; }
+        .btn-secondary { background-color: white; color: #2e71ca; border: 1.5px solid #2e71ca; }
+        .btn-secondary:hover { background-color: #f0f7ff; }
+    </style>
+</head>
+<body>
+    <div class="master-card">
+        <div class="logo-container">
+            <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
+        </div>
+        
+        <!-- This is where B2C puts the hidden radio buttons -->
+        <div id="api"></div>
+
+        <!-- Your Custom Buttons -->
+        <button class="custom-btn btn-primary" onclick="selectOption('ResetPassword')">Reset My Password</button>
+        <button class="custom-btn btn-secondary" onclick="selectOption('SignIn')">Sign In with Existing Credentials</button>
+    </div>
+
+    <script>
+        function selectOption(val) {
+            // 1. Find the hidden radio button created by B2C
+            var radio = document.querySelector('input[value="' + val + '"]');
+            if (radio) {
+                radio.checked = true;
+                // 2. Submit the form to move to the next step in the XML journey
+                document.getElementById('continue').click();
+            }
+        }
+    </script>
+</body>
+</html>
