@@ -22,85 +22,97 @@
         input { width: 100% !important; padding: 12px !important; border: 1.5px solid #333 !important; border-radius: 8px !important; box-sizing: border-box !important; margin-top: 5px; }
         button { width: 100% !important; padding: 14px !important; background-color: #2e71ca !important; color: white !important; border: none !important; border-radius: 8px !important; font-weight: 600 !important; margin-top: 15px !important; cursor: pointer !important; }
 
-        .error { color: red; font-size: 14px; }
         #forgotPassword { display: inline-block !important; color: #2e71ca; font-size: 14px; margin: 10px 0; text-decoration: underline; cursor: pointer; }
 
-        /* Custom Toggle UI - Visible by default */
+        /* --- VISIBILITY CLASSES --- */
         .hidden-ui { display: none !important; }
+        
+        /* We hide the api div by default via CSS */
+        #api { display: none; }
+        #api.show-api { display: block !important; }
+
         .custom-btn-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
         .btn-outline { background-color: transparent !important; color: #2e71ca !important; border: 1px solid #2e71ca !important; }
     </style>
 
     <script>
-        // We define the state outside so it persists across B2C re-renders
+        // Track state globally
         var userHasToggled = false;
 
-        function runAllLogic() {
+        function updateVisibility() {
             var apiDiv = document.getElementById('api');
-            var customContainer = document.getElementById('custom-action-container');
-            if (!apiDiv || !customContainer) return;
+            var customButtons = document.getElementById('custom-action-container');
+            if (!apiDiv || !customButtons) return;
 
             var emailInput = document.getElementById('email');
             var passwordInput = document.getElementById('password');
             var forgotPasswordLink = document.getElementById('forgotPassword');
-            var continueBtn = document.getElementById('continue') || document.getElementById('next');
             
-            // LOGIC: Show buttons if API is empty OR if it's the login screen
+            // 1. Detect Screen Type
             var isApiEmpty = apiDiv.innerHTML.trim() === "";
+            // B2C Login Screen usually has email and password fields
             var isLoginScreen = !!(emailInput && passwordInput && forgotPasswordLink);
 
+            // 2. Decide what to show
             if (isApiEmpty || isLoginScreen) {
-                // If the user clicked "Show Login", hide custom buttons and show fields
                 if (userHasToggled) {
-                    customContainer.classList.add('hidden-ui');
-                    if(emailInput) (emailInput.closest('.entry-item') || emailInput.parentElement).classList.remove('hidden-ui');
-                    if(passwordInput) (passwordInput.closest('.entry-item') || passwordInput.parentElement).classList.remove('hidden-ui');
-                    if(continueBtn) continueBtn.classList.remove('hidden-ui');
+                    // USER CLICKED SIGN IN: Show API, hide custom buttons
+                    apiDiv.classList.add('show-api');
+                    customButtons.classList.add('hidden-ui');
                 } else {
-                    // Default state: Show custom buttons, hide B2C fields
-                    customContainer.classList.remove('hidden-ui');
-                    if(emailInput) (emailInput.closest('.entry-item') || emailInput.parentElement).classList.add('hidden-ui');
-                    if(passwordInput) (passwordInput.closest('.entry-item') || passwordInput.parentElement).classList.add('hidden-ui');
-                    if(continueBtn) continueBtn.classList.add('hidden-ui');
+                    // INITIAL STATE: Hide API, show custom buttons
+                    apiDiv.classList.remove('show-api');
+                    customButtons.classList.remove('hidden-ui');
                 }
             } else {
-                // We are on an MFA or Reset screen: Hide custom buttons always
-                customContainer.classList.add('hidden-ui');
-                userHasToggled = false; // reset for next visit
+                // OTHER SCREENS (MFA, Code Verification, New Password): 
+                // Always show API and hide custom buttons automatically
+                apiDiv.classList.add('show-api');
+                customButtons.classList.add('hidden-ui');
+            }
 
-                // Handle the verification-based visibility for Continue button
-                if (continueBtn) {
-                    var verificationControl = document.querySelector('.verificationControlLayout') || document.getElementById('email_ver_control');
-                    var successMsg = document.getElementById('email_success');
-                    var isVerificationVisible = verificationControl && verificationControl.offsetParent !== null;
-                    var isVerified = successMsg && successMsg.offsetParent !== null;
+            // 3. Handle the "Continue" button logic for Verification screens
+            var continueBtn = document.getElementById('continue') || document.getElementById('next');
+            if (continueBtn && !isLoginScreen) {
+                var verificationControl = document.querySelector('.verificationControlLayout') || document.getElementById('email_ver_control');
+                var successMsg = document.getElementById('email_success');
+                var isVerifying = verificationControl && verificationControl.offsetParent !== null;
+                var isVerified = successMsg && successMsg.offsetParent !== null;
 
-                    if (isVerificationVisible && !isVerified) {
-                        continueBtn.style.setProperty('display', 'none', 'important');
-                    } else {
-                        continueBtn.style.setProperty('display', 'block', 'important');
-                    }
+                if (isVerifying && !isVerified) {
+                    continueBtn.style.setProperty('display', 'none', 'important');
+                } else {
+                    continueBtn.style.setProperty('display', 'block', 'important');
                 }
             }
         }
 
-        // Action for the custom buttons
+        // Button Click Handlers
         function handleResetClick() {
             var forgot = document.getElementById('forgotPassword');
-            if (forgot) forgot.click();
+            if (forgot) {
+                forgot.click();
+            } else {
+                // If it's not loaded yet, wait and try to click again
+                userHasToggled = true; // Show API so B2C script can find the link
+                updateVisibility();
+                setTimeout(function() { document.getElementById('forgotPassword').click(); }, 100);
+            }
         }
 
         function handleSignInClick() {
             userHasToggled = true;
-            runAllLogic();
+            updateVisibility();
         }
 
-        // Start observing as soon as the DOM is ready
+        // Observer to catch B2C dynamic updates
         document.addEventListener("DOMContentLoaded", function() {
-            var target = document.body; // Observe body so we catch #api appearing
-            var observer = new MutationObserver(runAllLogic);
+            var target = document.body;
+            var observer = new MutationObserver(updateVisibility);
             observer.observe(target, { childList: true, subtree: true, attributes: true });
-            setInterval(runAllLogic, 500);
+            
+            // Safety timer
+            setInterval(updateVisibility, 500);
         });
     </script>
 </head>
@@ -110,12 +122,13 @@
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
 
-        <!-- Custom buttons are now static and outside #api -->
+        <!-- Custom buttons shown first -->
         <div id="custom-action-container" class="custom-btn-container">
             <button class="btn-reset" onclick="handleResetClick()">Reset My Password</button>
             <button class="btn-outline" onclick="handleSignInClick()">Sign In with Existing Credentials</button>
         </div>
 
+        <!-- The B2C div, hidden by default via CSS class #api -->
         <div id="api"></div>
     </div>
 </body>
