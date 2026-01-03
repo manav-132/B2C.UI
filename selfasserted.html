@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- ALL YOUR ORIGINAL CSS --- */
+        /* --- LAYOUT & CARD --- */
         body {
             background-color: #f8f9fa;
             font-family: 'Open Sans', sans-serif;
@@ -16,194 +16,164 @@
             min-height: 100vh;
             margin: 0;
         }
-        .master-card {
-            background-color: #ffffff;
-            width: 100%;
-            max-width: 460px;
-            padding: 40px;
-            border-radius: 12px;
-            border: 1px solid #e1e4e8;
-            box-sizing: border-box;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        }
-        .heading, .h1 { display: none; }
-        .intro p { display: none !important; }
-        h2 { font-size: 1rem !important; font-weight: 400 !important; }
-        .logo-container { text-align: center; margin-bottom: 30px; }
-        .logo-container img { max-width: 220px; height: auto; }
+.master-card {
+        background-color: #ffffff;
+        width: 100%;
+        max-width: 460px;
+        padding: 40px;
+        border-radius: 12px;
+        border: 1px solid #e1e4e8;
+        box-sizing: border-box;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+    .heading {
+        display: none;
+    }
+    .h1 {
+        display: none;
+    }
+    .intro p{
+         display: none !important ;
+    }
+    h2 {
+        font-size: 1rem !important;
+        font-weight: 400 !important;
+    }
+    .logo-container { text-align: center; margin-bottom: 30px; }
+    .logo-container img { max-width: 220px; height: auto; }
 
-        h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
+    /* --- TYPOGRAPHY --- */
+    h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
+    .intro p { display: none !important; font-size: 14px !important; font-weight: 600 !important; line-height: 1.5 !important; margin-bottom: 20px !important; }
 
-        ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
-        li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
-        
-        input {
-            width: 100% !important;
-            padding: 12px !important;
-            border: 1.5px solid #333 !important;
-            border-radius: 8px !important;
-            box-sizing: border-box !important;
-            margin-top: 5px;
-        }
+    /* --- FORM ALIGNMENT (Fixes Indentation) --- */
+    ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
+    li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
+    
+    input {
+        width: 100% !important;
+        padding: 12px !important;
+        border: 1.5px solid #333 !important;
+        border-radius: 8px !important;
+        box-sizing: border-box !important;
+        margin-top: 5px;
+    }
 
-        button {
-            width: 100% !important;
-            padding: 14px !important;
-            background-color: #2e71ca !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            margin-top: 15px !important;
-            cursor: pointer !important;
-        }
-        div#verifying_blurb, div#claimVerificationServerError { display: none !important; }
-        .error.itemLevel.show, .error.itemLevel { color: red; }
-        .error.pageLevel { color: red; margin-bottom: 10px !important; }
-        label#email_label { margin-top: 20px !important; display: inline-block; }
-        #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { display: none !important; }
+    button {
+        width: 100% !important;
+        padding: 14px !important;
+        background-color: #2e71ca !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        margin-top: 15px !important;
+        cursor: pointer !important;
+    }
+    div#verifying_blurb{
+        display:none !important;
+    }
+    div#claimVerificationServerError {
+    display: none !important;
+}
+        .error.itemLevel.show {
+    display: none !important;
+}
+        .error.itemLevel {
+    color: red;
+}
+        .error.pageLevel {
+    color: red;
+    margin-bottom: 10px !important;
+}
+    /* --- BUTTON VISIBILITY LOGIC --- */
+    
+    /* Instead of !important hide, we use a class that JS can control */
+    .hide-button {
+        display: none !important;
+    
+    }
+    div#email_fail_retry {
+    color: red;
+}
+    label#email_label {
+        margin-top: 20px !important;
+        display: inline-block;
+    }
+    /* Elements to always hide */
+    #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { 
+        display: none !important; 
+    }
 
-        #forgotPassword {
-            display: inline-block !important;
-            color: #2e71ca;
-            font-size: 14px;
-            margin: 10px 0;
-            text-decoration: underline;
-        }
-
-        /* --- TOGGLE BUTTON STYLES --- */
-        .hidden-ui { display: none !important; }
-
-        .custom-btn-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .btn-reset {
-            width: 100% !important;
-            padding: 14px !important;
-            background-color: #2e71ca !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            cursor: pointer !important;
-        }
-
-        .btn-outline {
-            width: 100% !important;
-            padding: 14px !important;
-            background-color: transparent !important;
-            color: #2e71ca !important;
-            border: 1px solid #2e71ca !important;
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            cursor: pointer !important;
-            margin-top: 10px !important;
-        }
-    </style>
+    #forgotPassword {
+        display: inline-block !important;
+        color: #2e71ca;
+        font-size: 14px;
+        margin: 10px 0;
+        text-decoration: underline;
+    }
+</style>
     <script>
-    (function() {
-        function runUnifiedUI() {
-            const api = document.getElementById('api');
-            if (!api) return;
+(function() {
+console.log("ABO Debug: Script Initialized");
+function manageUI() {
+    const continueBtn = document.getElementById('continue');
+    if (!continueBtn) return;
 
-            // 1. Check for standard B2C elements
-            const emailField = document.getElementById('email');
-            const passwordField = document.getElementById('password');
-            const forgotLink = document.getElementById('forgotPassword') || document.querySelector('a#forgotPassword');
-            const nextBtn = document.getElementById('next') || document.getElementById('continue');
-            
-            // Check if we have both fields (Login Screen)
-            const isLoginScreen = !!(emailField && passwordField);
-            
-            // Check if user has already chosen to sign in during this session
-            const userHasChosenSignIn = sessionStorage.getItem('abo_signin_active') === 'true';
+    // 1. Check if an email verification control exists on THIS specific page
+    // B2C usually puts the verification elements inside a container or uses these IDs
+    const emailInput = document.getElementById('email');
+    const verificationControl = document.getElementById('email_ver_control') || document.querySelector('.verificationControlLayout');
+    
+    // 2. Identify the verification state elements
+    const sendBtn = document.getElementById('email_ver_but_send');
+    const verifyBtn = document.getElementById('email_ver_but_verify');
+    const successMsg = document.getElementById('email_success');
 
-            // 2. LOGIC: On Login Screen + Not clicked "Sign In" yet
-            if (isLoginScreen && !userHasChosenSignIn) {
-                // Find containers (the <li> tags) to hide inputs + labels
-                const emailContainer = emailField.closest('li') || emailField.parentElement;
-                const passwordContainer = passwordField.closest('li') || passwordField.parentElement;
+    function isVisible(el) {
+        return !!(el && el.offsetParent !== null);
+    }
 
-                // Hide original UI
-                if (emailContainer) emailContainer.classList.add('hidden-ui');
-                if (passwordContainer) passwordContainer.classList.add('hidden-ui');
-                if (nextBtn) nextBtn.classList.add('hidden-ui');
+    const hasEmailVerificationOnPage = !!(emailInput || verificationControl || sendBtn);
+    const isVerifying = isVisible(sendBtn) || isVisible(verifyBtn);
+    const isVerified = isVisible(successMsg);
 
-                // Inject our Custom Buttons if they aren't there
-                let customBox = document.getElementById('custom-action-wrapper');
-                if (!customBox) {
-                    customBox = document.createElement('div');
-                    customBox.id = 'custom-action-wrapper';
-                    customBox.className = 'custom-btn-container';
-                    customBox.innerHTML = `
-                        <button type="button" class="btn-reset" id="btn-reset-pwd">Reset My Password</button>
-                        <button type="button" class="btn-outline" id="btn-show-signin">Sign In with Existing Credentials</button>
-                    `;
-                    api.appendChild(customBox);
+    // --- NEW LOGIC ---
 
-                    // Reset Password Button Logic
-                    document.getElementById('btn-reset-pwd').onclick = function() {
-                        if (forgotLink) forgotLink.click();
-                    };
+    if (!hasEmailVerificationOnPage) {
+        // CASE A: This is a screen like "New Password" where no email verification is needed.
+        // Ensure the button is VISIBLE.
+        console.log("ABO Debug: No verification control found. Showing button for standard form.");
+        continueBtn.style.setProperty('display', 'block', 'important');
+        continueBtn.style.setProperty('visibility', 'visible', 'important');
+    } 
+    else if (isVerified) {
+        // CASE B: Email verification is present and SUCCESSFUL.
+        console.log("ABO Debug: Verification Successful. Showing button.");
+        continueBtn.style.setProperty('display', 'block', 'important');
+        continueBtn.style.setProperty('visibility', 'visible', 'important');
+    } 
+    else {
+        // CASE C: Email verification is present but NOT finished.
+        console.log("ABO Debug: Verification in progress/required. Hiding button.");
+        continueBtn.style.setProperty('display', 'none', 'important');
+    }
+}
 
-                    // Show Sign-In Fields Logic
-                    document.getElementById('btn-show-signin').onclick = function() {
-                        sessionStorage.setItem('abo_signin_active', 'true');
-                        customBox.remove();
-                        runUnifiedUI(); // Immediate refresh
-                    };
-                }
-            } 
-            // 3. LOGIC: On any other screen (Verify, Reset) OR user clicked Sign In
-            else {
-                // Remove custom buttons if they exist
-                const customBox = document.getElementById('custom-action-wrapper');
-                if (customBox) customBox.remove();
+// Standard B2C Observers
+const observer = new MutationObserver(manageUI);
+const apiTarget = document.getElementById('api');
+if (apiTarget) {
+    observer.observe(apiTarget, { childList: true, subtree: true, attributes: true });
+}
 
-                // Show original fields
-                if (emailField) {
-                    const ec = emailField.closest('li') || emailField.parentElement;
-                    if (ec) ec.classList.remove('hidden-ui');
-                }
-                if (passwordField) {
-                    const pc = passwordField.closest('li') || passwordField.parentElement;
-                    if (pc) pc.classList.remove('hidden-ui');
-                }
-                
-                // Show Continue button and handle verification logic
-                if (nextBtn) {
-                    nextBtn.classList.remove('hidden-ui');
-                    const successMsg = document.getElementById('email_success');
-                    const isVerifyOnlyPage = (emailField && !passwordField);
+// Safety net interval
+setInterval(manageUI, 500);
 
-                    if (isVerifyOnlyPage) {
-                        const isVerified = !!(successMsg && successMsg.offsetParent !== null);
-                        nextBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
-                    } else {
-                        nextBtn.style.setProperty('display', 'block', 'important');
-                    }
-                }
-            }
-        }
-
-        // MutationObserver: Watches for B2C changing the content of #api
-        const observer = new MutationObserver(runUnifiedUI);
-        const target = document.getElementById('api');
-        if (target) {
-            observer.observe(target, { childList: true, subtree: true });
-        }
-
-        // Safety Interval: Checks every 500ms
-        setInterval(runUnifiedUI, 500);
-
-        // Initial check
-        runUnifiedUI();
-    })();
-    </script>
+// Initial run
+manageUI();
+})();
+</script>
 </head>
 <body>
     <div class="master-card">
@@ -213,7 +183,9 @@
         <div id="api"></div>
     </div>
 
-    
+
 </body>
 </html>
+
+
 
