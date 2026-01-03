@@ -8,14 +8,15 @@
     <style>
         body { background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .master-card { background-color: #ffffff; width: 100%; max-width: 460px; padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
-        .logo-container img { max-width: 220px; height: auto; margin-bottom: 30px; }
+        .logo-container img { max-width: 250px; height: auto; margin-bottom: 30px; }
         
-        /* Hide the default B2C UI (radio buttons and labels) */
-        #api .intro, #api .options, #api .attrEntry, #api .buttons { display: none; }
+        /* 1. Hide the default B2C UI (the radio buttons and the real Continue button) */
+        #api .intro, #api .options, #api .attrEntry, #api .buttons { display: none !important; }
+        #api h1, #api h2 { display: none !important; }
 
-        /* Custom Buttons styling to match image */
+        /* 2. Custom Buttons styling to match your original image */
         .custom-btn {
-            width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; transition: all 0.2s; box-sizing: border-box; display: block; text-decoration: none;
+            width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; transition: all 0.2s; box-sizing: border-box; display: block; text-decoration: none;
         }
         .btn-primary { background-color: #2e71ca; color: white; border: none; }
         .btn-primary:hover { background-color: #245ba3; }
@@ -29,22 +30,28 @@
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
         
-        <!-- This is where B2C puts the hidden radio buttons -->
+        <!-- Placeholder for B2C system elements -->
         <div id="api"></div>
 
-        <!-- Your Custom Buttons -->
-        <button class="custom-btn btn-primary" onclick="selectOption('ResetPassword')">Reset My Password</button>
-        <button class="custom-btn btn-secondary" onclick="selectOption('SignIn')">Sign In with Existing Credentials</button>
+        <!-- These are the buttons the user actually sees -->
+        <div id="custom-buttons">
+            <button class="custom-btn btn-primary" onclick="submitChoice('ResetPassword')">Reset My Password</button>
+            <button class="custom-btn btn-secondary" onclick="submitChoice('SignIn')">Sign In with Existing Credentials</button>
+        </div>
     </div>
 
     <script>
-        function selectOption(val) {
-            // 1. Find the hidden radio button created by B2C
+        function submitChoice(val) {
+            // Find the hidden radio button rendered by B2C
             var radio = document.querySelector('input[value="' + val + '"]');
-            if (radio) {
+            var continueBtn = document.getElementById('continue');
+            
+            if (radio && continueBtn) {
                 radio.checked = true;
-                // 2. Submit the form to move to the next step in the XML journey
-                document.getElementById('continue').click();
+                // Trigger the 'Continue' click to advance the journey
+                continueBtn.click();
+            } else {
+                console.error("B2C elements not yet loaded or missing.");
             }
         }
     </script>
