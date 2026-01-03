@@ -26,16 +26,12 @@
             box-sizing: border-box;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             position: relative;
-            min-height: 320px;
+            min-height: 350px;
         }
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
 
-        /* Hiding B2C clutter */
-        .heading, .h1, .intro, .intro p, #forgotPassword { 
-            display: none !important; 
-        }
-
+        .heading, .h1, .intro, .intro p, #forgotPassword { display: none !important; }
         h2 { font-size: 1rem !important; font-weight: 400 !important; }
         ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
         li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
@@ -61,23 +57,23 @@
             cursor: pointer !important;
         }
 
-        /* Verification Styles */
+        /* Verification Message Styles */
         div#verifying_blurb, div#claimVerificationServerError { display: none !important; }
         .error.itemLevel.show, .error.itemLevel { color: red; }
         .error.pageLevel { color: red; margin-bottom: 10px !important; }
         div#email_fail_retry { color: red; }
         label#email_label { margin-top: 20px !important; display: inline-block; }
         #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { display: none !important; }
-        
-        /* --- UI DISPLAY CONTROL --- */
-        
-        /* 1. API is hidden by default to avoid showing B2C fields behind custom buttons */
-        #api { display: none; } 
-        #api.show-api { display: block !important; }
 
-        /* 2. Custom Buttons are VISIBLE by default for the first screen */
+        /* --- STABLE UI STATE CONTROL --- */
+        
+        /* Default State: Buttons show, API hidden */
         #custom-action-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-        #custom-action-container.hide-ui { display: none !important; }
+        #api { display: none; }
+
+        /* Journey Active State: Buttons hide, API shows */
+        body.journey-active #custom-action-container { display: none !important; }
+        body.journey-active #api { display: block !important; }
 
         .btn-outline {
             background-color: transparent !important;
@@ -86,7 +82,7 @@
             margin-top: 10px !important;
         }
 
-        /* 3. Loader - Hidden by default, used for intermediate screens */
+        /* Intermediate Loader */
         #custom-loader {
             display: none;
             position: absolute;
@@ -107,116 +103,96 @@
     </style>
 
     <script>
-    (function() {
-        // Flag to check if we've moved past the initial landing screen
-        let journeyActive = sessionStorage.getItem('abo_journey_active') === 'true';
-
-        function updateUI() {
-            const api = document.getElementById('api');
-            const customBox = document.getElementById('custom-action-container');
-            const loader = document.getElementById('custom-loader');
-            
-            if (!api || !customBox) return;
-
-            const emailField = document.getElementById('email');
-            const passwordField = document.getElementById('password');
-            const continueBtn = document.getElementById('next') || document.getElementById('continue');
-
-            // Check B2C content
-            const hasContent = api.innerHTML.trim().length > 50 || api.querySelector('input');
-            const isLoginFieldsPresent = !!(emailField && passwordField);
-
-            // 1. If journey flag is active (Refresh on Reset/MFA or Button Clicked)
-            if (journeyActive) {
-                customBox.classList.add('hide-ui');
-                api.classList.add('show-api');
-                
-                // Show loader only if API hasn't rendered content yet (prevents blank screen during journey)
-                if (!hasContent) {
-                    loader.style.display = 'flex';
-                } else {
-                    loader.style.display = 'none';
-                }
-
-                // Handle Continue button for verification screens
-                if (continueBtn && !passwordField) {
-                    const successMsg = document.getElementById('email_success');
-                    const isVerified = !!(successMsg && successMsg.offsetParent !== null);
-                    continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
-                } else if (continueBtn) {
-                    continueBtn.style.setProperty('display', 'block', 'important');
-                }
-                return;
-            }
-
-            // 2. Journey NOT active yet - Screen detection
-            if (hasContent) {
-                if (isLoginFieldsPresent) {
-                    // It's the landing screen: Show buttons, keep API hidden
-                    customBox.classList.remove('hide-ui');
-                    api.classList.remove('show-api');
-                    loader.style.display = 'none';
-                } else {
-                    // B2C loaded a different screen automatically: Start journey, show API
-                    sessionStorage.setItem('abo_journey_active', 'true');
-                    journeyActive = true;
-                    updateUI(); // Re-run to apply screen changes
-                }
-            } else {
-                // API is empty (still loading B2C). Keep showing landing buttons for now
-                customBox.classList.remove('hide-ui');
-                api.classList.remove('show-api');
-            }
+        // 1. INSTANT REFRESH PROTECTION
+        // This runs before the body even finishes loading to prevent flickering
+        if (sessionStorage.getItem('abo_journey_active') === 'true') {
+            document.documentElement.classList.add('journey-active'); // Add to HTML tag initially
         }
 
-        // --- BUTTON HANDLERS ---
-        window.handleReset = function() {
-            sessionStorage.setItem('abo_journey_active', 'true');
-            journeyActive = true;
-            
-            // Show loader instantly during transition
-            document.getElementById('custom-loader').style.display = 'flex';
-            document.getElementById('custom-action-container').classList.add('hide-ui');
-            document.getElementById('api').classList.add('show-api');
+        (function() {
+            function initialize() {
+                const api = document.getElementById('api');
+                const loader = document.getElementById('custom-loader');
+                if (!api) return;
 
-            // Find and click the hidden B2C forgot password link
-            let attempts = 0;
-            const poll = setInterval(() => {
-                const link = document.getElementById('forgotPassword');
-                if (link) {
-                    clearInterval(poll);
-                    link.click();
+                // Transfer class from HTML to Body if needed
+                if (document.documentElement.classList.contains('journey-active')) {
+                    document.body.classList.add('journey-active');
                 }
-                if (++attempts > 40) {
-                    clearInterval(poll);
-                    updateUI();
+
+                function syncUI() {
+                    const isJourney = document.body.classList.contains('journey-active');
+                    const hasContent = api.innerText.trim().length > 10;
+                    const emailField = document.getElementById('email');
+                    const passwordField = document.getElementById('password');
+                    const continueBtn = document.getElementById('next') || document.getElementById('continue');
+
+                    // If journey started, handle loader and Continue button
+                    if (isJourney) {
+                        if (hasContent) {
+                            loader.style.display = 'none';
+                        } else {
+                            loader.style.display = 'flex';
+                        }
+
+                        // Continue button logic
+                        if (continueBtn) {
+                            const isVerificationScreen = (emailField && !passwordField);
+                            const successMsg = document.getElementById('email_success');
+                            if (isVerificationScreen) {
+                                const isVerified = !!(successMsg && successMsg.offsetParent !== null);
+                                continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
+                            } else {
+                                continueBtn.style.setProperty('display', 'block', 'important');
+                            }
+                        }
+                    } 
+                    // Automatically trigger journey if B2C loads a non-login screen
+                    else if (hasContent && api.querySelector('input') && !(emailField && passwordField)) {
+                        startJourney();
+                    }
                 }
-            }, 150);
-        };
 
-        window.handleSignIn = function() {
-            sessionStorage.setItem('abo_journey_active', 'true');
-            journeyActive = true;
-            document.getElementById('custom-loader').style.display = 'flex';
-            updateUI();
-        };
+                window.handleReset = function() {
+                    startJourney();
+                    loader.style.display = 'flex';
+                    
+                    // Single click polling for forgot link
+                    let attempts = 0;
+                    const poll = setInterval(() => {
+                        const link = document.getElementById('forgotPassword');
+                        if (link) {
+                            clearInterval(poll);
+                            link.click();
+                        }
+                        if (++attempts > 50) clearInterval(poll);
+                    }, 150);
+                };
 
-        // MutationObserver to track B2C dynamic updates
-        const observer = new MutationObserver(updateUI);
-        document.addEventListener("DOMContentLoaded", () => {
-            const target = document.getElementById('api');
-            if (target) {
-                observer.observe(target, { childList: true, subtree: true, attributes: true });
+                window.handleSignIn = function() {
+                    startJourney();
+                    loader.style.display = 'flex';
+                };
+
+                function startJourney() {
+                    sessionStorage.setItem('abo_journey_active', 'true');
+                    document.body.classList.add('journey-active');
+                    syncUI();
+                }
+
+                const observer = new MutationObserver(syncUI);
+                observer.observe(api, { childList: true, subtree: true, attributes: true });
+                setInterval(syncUI, 500);
+                syncUI();
             }
-            setInterval(updateUI, 500);
-            updateUI();
-        });
-    })();
+
+            document.addEventListener("DOMContentLoaded", initialize);
+        })();
     </script>
 </head>
 <body>
     <div class="master-card">
-        <!-- Loader Spinner Overlay (Hidden by default) -->
+        <!-- Loader for intermediate screens -->
         <div id="custom-loader">
             <div class="spinner"></div>
         </div>
@@ -225,13 +201,13 @@
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
 
-        <!-- LANDING BUTTONS (Visible by default in HTML/CSS) -->
+        <!-- Landing buttons (Visible by default via CSS) -->
         <div id="custom-action-container">
             <button type="button" class="btn-reset" onclick="handleReset()">Reset My Password</button>
             <button type="button" class="btn-outline" onclick="handleSignIn()">Sign In with Existing Credentials</button>
         </div>
 
-        <!-- B2C Container (Hidden initially) -->
+        <!-- B2C API container (Hidden by default via CSS) -->
         <div id="api"></div>
     </div>
 </body>
