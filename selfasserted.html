@@ -27,7 +27,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
         .heading, .h1 { display: none; }
-        .intro p { display: none !important; }
+        .intro p, .intro { display: none !important; }
         h2 { font-size: 1rem !important; font-weight: 400 !important; }
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
@@ -63,9 +63,9 @@
         label#email_label { margin-top: 20px !important; display: inline-block; }
         #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { display: none !important; }
 
-        /* --- THE NEW CSS-ONLY BUTTON TRANSFORMATIONS --- */
+        /* --- THE LOGIC TO HIDE/SHOW ELEMENTS --- */
 
-        /* 1. Turn the standard "Forgot Password" link into a Primary Button */
+        /* 1. Style the original Forgot Password link as a primary button */
         #forgotPassword {
             display: block !important;
             width: 100% !important;
@@ -77,12 +77,12 @@
             border-radius: 8px !important;
             font-weight: 600 !important;
             box-sizing: border-box;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            margin-top: 20px;
         }
-        #forgotPassword:hover { background-color: #245ba3; }
 
-        /* 2. Style for the dynamically added Sign-In toggle button */
-        .btn-signin-toggle {
+        /* 2. Custom Sign-In toggle button style */
+        .btn-toggle-view {
             width: 100% !important;
             padding: 14px !important;
             background-color: transparent !important;
@@ -92,20 +92,24 @@
             font-weight: 600 !important;
             cursor: pointer !important;
             box-sizing: border-box;
+            margin-top: 10px;
         }
 
-        /* 3. Logic to hide fields ONLY when 'initial-view' class is present */
+        /* 3. Initial View: Hide labels, inputs, and original Sign In button */
         .initial-view .entry-item { display: none !important; }
+        .initial-view label { display: none !important; }
         .initial-view #next, .initial-view #continue { display: none !important; }
         
-        /* Ensure the Reset button stays visible even when fields are hidden */
-        .initial-view #forgotPassword { display: block !important; }
+        /* Ensure ForgotPassword button is always at the top in initial view */
+        .initial-view #api { display: flex; flex-direction: column; }
+        .initial-view #forgotPassword { order: -2; }
+        .initial-view .btn-toggle-view { order: -1; }
 
     </style>
 
     <script>
     (function() {
-        function manageLoginScreen() {
+        function runToggleLogic() {
             const api = document.getElementById('api');
             if (!api) return;
 
@@ -113,43 +117,41 @@
             const passwordField = document.getElementById('password');
             const forgotLink = document.getElementById('forgotPassword');
 
-            // Detect if we are on the Login Screen
+            // Detect Login Screen
             const isLoginScreen = !!(emailField && passwordField);
 
             if (isLoginScreen) {
-                // Change the text of the existing B2C forgot password link
+                // Change link text to "Reset My Password"
                 if (forgotLink) forgotLink.innerText = "Reset My Password";
 
-                // Add the initial-view class if it's the first load
-                if (!api.classList.contains('initial-view') && !api.classList.contains('form-revealed')) {
+                // Apply initial hidden state if user hasn't toggled it yet
+                if (!api.classList.contains('form-visible') && !api.classList.contains('initial-view')) {
                     api.classList.add('initial-view');
                 }
 
-                // Add our custom "Sign In" toggle button if it doesn't exist
-                if (!document.getElementById('custom-signin-toggle') && api.classList.contains('initial-view')) {
+                // Inject the "Sign In" button if it's missing
+                if (!document.getElementById('custom-toggle-btn') && api.classList.contains('initial-view')) {
                     const toggleBtn = document.createElement('button');
-                    toggleBtn.id = 'custom-signin-toggle';
+                    toggleBtn.id = 'custom-toggle-btn';
                     toggleBtn.type = 'button';
-                    toggleBtn.className = 'btn-signin-toggle';
+                    toggleBtn.className = 'btn-toggle-view';
                     toggleBtn.innerText = 'Sign In with Existing Credentials';
                     
                     toggleBtn.onclick = function() {
                         api.classList.remove('initial-view');
-                        api.classList.add('form-revealed');
-                        this.remove(); // Remove this button once fields are shown
+                        api.classList.add('form-visible');
+                        this.remove(); // Remove button once form is revealed
                     };
 
-                    // Insert the button into the API div
                     api.appendChild(toggleBtn);
                 }
             } else {
-                // Not a login screen (e.g., verification or MFA)
-                // Remove all special classes so standard B2C logic works
+                // Verification or MFA screen: Show everything naturally
                 api.classList.remove('initial-view');
-                const existingBtn = document.getElementById('custom-signin-toggle');
-                if (existingBtn) existingBtn.remove();
-                
-                // On verification screens, handle the Continue button visibility
+                const btn = document.getElementById('custom-toggle-btn');
+                if (btn) btn.remove();
+
+                // Manage Continue button for Email Verification pages
                 const continueBtn = document.getElementById('next') || document.getElementById('continue');
                 const successMsg = document.getElementById('email_success');
                 if (continueBtn && emailField && !passwordField) {
@@ -159,15 +161,15 @@
             }
         }
 
-        // Run on every DOM change inside the API div
-        const observer = new MutationObserver(manageLoginScreen);
+        // Observer for B2C dynamic updates
+        const observer = new MutationObserver(runToggleLogic);
         const target = document.getElementById('api');
         if (target) {
             observer.observe(target, { childList: true, subtree: true, attributes: true });
         }
 
-        // Safety interval
-        setInterval(manageLoginScreen, 400);
+        // Backup safety check
+        setInterval(runToggleLogic, 500);
     })();
     </script>
 </head>
@@ -176,7 +178,7 @@
         <div class="logo-container">
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
-        <!-- Everything happens inside this div now -->
+        <!-- All logic happens inside here -->
         <div id="api"></div>
     </div>
 </body>
