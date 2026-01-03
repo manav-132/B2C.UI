@@ -31,7 +31,11 @@
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
 
-        .heading, .h1, .intro, .intro p, #forgotPassword { display: none !important; }
+        /* Hiding B2C clutter */
+        .heading, .h1, .intro, .intro p, #forgotPassword { 
+            display: none !important; 
+        }
+
         h2 { font-size: 1rem !important; font-weight: 400 !important; }
         ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
         li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
@@ -67,11 +71,11 @@
 
         /* --- STABLE UI STATE CONTROL --- */
         
-        /* Default State: Buttons show, API hidden */
+        /* Default: Buttons show, API hidden */
         #custom-action-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
         #api { display: none; }
 
-        /* Journey Active State: Buttons hide, API shows */
+        /* When journey-active class is on body: Buttons hide, API shows */
         body.journey-active #custom-action-container { display: none !important; }
         body.journey-active #api { display: block !important; }
 
@@ -103,96 +107,100 @@
     </style>
 
     <script>
-        // 1. INSTANT REFRESH PROTECTION
-        // This runs before the body even finishes loading to prevent flickering
+        // 1. REFRESH PROTECTION: Runs instantly before page render
         if (sessionStorage.getItem('abo_journey_active') === 'true') {
-            document.documentElement.classList.add('journey-active'); // Add to HTML tag initially
+            document.documentElement.classList.add('journey-active');
         }
 
+        // 2. GLOBAL FUNCTIONS: Defined outside any scopes so buttons can see them immediately
+        window.handleReset = function() {
+            sessionStorage.setItem('abo_journey_active', 'true');
+            document.body.classList.add('journey-active');
+            const loader = document.getElementById('custom-loader');
+            if (loader) loader.style.display = 'flex';
+            
+            // Single-click polling logic
+            let attempts = 0;
+            const poll = setInterval(function() {
+                const link = document.getElementById('forgotPassword');
+                attempts++;
+                if (link) {
+                    clearInterval(poll);
+                    link.click();
+                } else if (attempts > 50) {
+                    clearInterval(poll);
+                    if (loader) loader.style.display = 'none';
+                }
+            }, 150);
+        };
+
+        window.handleSignIn = function() {
+            sessionStorage.setItem('abo_journey_active', 'true');
+            document.body.classList.add('journey-active');
+            const loader = document.getElementById('custom-loader');
+            if (loader) loader.style.display = 'flex';
+        };
+
+        // 3. UI SYNC LOGIC
         (function() {
-            function initialize() {
+            function syncUI() {
                 const api = document.getElementById('api');
                 const loader = document.getElementById('custom-loader');
+                const body = document.body;
                 if (!api) return;
 
-                // Transfer class from HTML to Body if needed
+                // Sync the HTML-level refresh class to the body
                 if (document.documentElement.classList.contains('journey-active')) {
-                    document.body.classList.add('journey-active');
+                    body.classList.add('journey-active');
                 }
 
-                function syncUI() {
-                    const isJourney = document.body.classList.contains('journey-active');
-                    const hasContent = api.innerText.trim().length > 10;
-                    const emailField = document.getElementById('email');
-                    const passwordField = document.getElementById('password');
-                    const continueBtn = document.getElementById('next') || document.getElementById('continue');
+                const isJourney = body.classList.contains('journey-active');
+                const hasContent = api.innerText.trim().length > 10;
+                const emailField = document.getElementById('email');
+                const passwordField = document.getElementById('password');
+                const continueBtn = document.getElementById('next') || document.getElementById('continue');
 
-                    // If journey started, handle loader and Continue button
-                    if (isJourney) {
-                        if (hasContent) {
-                            loader.style.display = 'none';
-                        } else {
-                            loader.style.display = 'flex';
-                        }
-
-                        // Continue button logic
-                        if (continueBtn) {
-                            const isVerificationScreen = (emailField && !passwordField);
-                            const successMsg = document.getElementById('email_success');
-                            if (isVerificationScreen) {
-                                const isVerified = !!(successMsg && successMsg.offsetParent !== null);
-                                continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
-                            } else {
-                                continueBtn.style.setProperty('display', 'block', 'important');
-                            }
-                        }
-                    } 
-                    // Automatically trigger journey if B2C loads a non-login screen
-                    else if (hasContent && api.querySelector('input') && !(emailField && passwordField)) {
-                        startJourney();
+                if (isJourney) {
+                    // Hide loader once B2C renders content
+                    if (hasContent && loader) {
+                        loader.style.display = 'none';
                     }
-                }
-
-                window.handleReset = function() {
-                    startJourney();
-                    loader.style.display = 'flex';
                     
-                    // Single click polling for forgot link
-                    let attempts = 0;
-                    const poll = setInterval(() => {
-                        const link = document.getElementById('forgotPassword');
-                        if (link) {
-                            clearInterval(poll);
-                            link.click();
+                    // Continue button visibility logic
+                    if (continueBtn) {
+                        const isVerificationScreen = (emailField && !passwordField);
+                        const successMsg = document.getElementById('email_success');
+                        if (isVerificationScreen) {
+                            const isVerified = !!(successMsg && successMsg.offsetParent !== null);
+                            continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
+                        } else {
+                            continueBtn.style.setProperty('display', 'block', 'important');
                         }
-                        if (++attempts > 50) clearInterval(poll);
-                    }, 150);
-                };
-
-                window.handleSignIn = function() {
-                    startJourney();
-                    loader.style.display = 'flex';
-                };
-
-                function startJourney() {
+                    }
+                } 
+                // Auto-detect if journey should start (e.g. B2C loads non-login page automatically)
+                else if (hasContent && api.querySelector('input') && !(emailField && passwordField)) {
                     sessionStorage.setItem('abo_journey_active', 'true');
-                    document.body.classList.add('journey-active');
-                    syncUI();
+                    body.classList.add('journey-active');
                 }
-
-                const observer = new MutationObserver(syncUI);
-                observer.observe(api, { childList: true, subtree: true, attributes: true });
-                setInterval(syncUI, 500);
-                syncUI();
             }
 
-            document.addEventListener("DOMContentLoaded", initialize);
+            // Start observing
+            document.addEventListener("DOMContentLoaded", function() {
+                const api = document.getElementById('api');
+                if (api) {
+                    const observer = new MutationObserver(syncUI);
+                    observer.observe(api, { childList: true, subtree: true, attributes: true });
+                }
+                setInterval(syncUI, 500);
+                syncUI();
+            });
         })();
     </script>
 </head>
 <body>
     <div class="master-card">
-        <!-- Loader for intermediate screens -->
+        <!-- Loader Spinner Overlay -->
         <div id="custom-loader">
             <div class="spinner"></div>
         </div>
@@ -201,13 +209,13 @@
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
 
-        <!-- Landing buttons (Visible by default via CSS) -->
+        <!-- LANDING BUTTONS -->
         <div id="custom-action-container">
             <button type="button" class="btn-reset" onclick="handleReset()">Reset My Password</button>
             <button type="button" class="btn-outline" onclick="handleSignIn()">Sign In with Existing Credentials</button>
         </div>
 
-        <!-- B2C API container (Hidden by default via CSS) -->
+        <!-- B2C API DIV -->
         <div id="api"></div>
     </div>
 </body>
