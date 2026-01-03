@@ -6,152 +6,246 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- LAYOUT & CARD --- */
-        body { background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .master-card { background-color: #ffffff; width: 100%; max-width: 460px; padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
+        /* --- ALL YOUR ORIGINAL CSS KEPT AS IS --- */
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Open Sans', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .master-card {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 460px;
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid #e1e4e8;
+            box-sizing: border-box;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            position: relative; /* Added for loader positioning */
+        }
+        .heading, .h1 { display: none; }
+        .intro p { display: none !important; }
+        h2 { font-size: 1rem !important; font-weight: 400 !important; }
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
-        
-        /* Hide B2C clutter */
-        .heading, .h1, .intro p, #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny, div#verifying_blurb, div#claimVerificationServerError { display: none !important; }
-        
-        input { width: 100% !important; padding: 12px !important; border: 1.5px solid #333 !important; border-radius: 8px !important; box-sizing: border-box !important; margin-top: 5px; }
-        button { width: 100% !important; padding: 14px !important; background-color: #2e71ca !important; color: white !important; border: none !important; border-radius: 8px !important; font-weight: 600 !important; margin-top: 15px !important; cursor: pointer !important; }
 
-        #forgotPassword { display: none !important; }
+        h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
 
-        /* --- LOADING SPINNER --- */
-        .loader-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.9); display: none;
-            justify-content: center; align-items: center; z-index: 100;
+        ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
+        li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
+        
+        input {
+            width: 100% !important;
+            padding: 12px !important;
+            border: 1.5px solid #333 !important;
+            border-radius: 8px !important;
+            box-sizing: border-box !important;
+            margin-top: 5px;
+        }
+
+        button {
+            width: 100% !important;
+            padding: 14px !important;
+            background-color: #2e71ca !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            margin-top: 15px !important;
+            cursor: pointer !important;
+        }
+        div#verifying_blurb, div#claimVerificationServerError { display: none !important; }
+        .error.itemLevel.show, .error.itemLevel { color: red; }
+        .error.pageLevel { color: red; margin-bottom: 10px !important; }
+        .hide-button { display: none !important; }
+        div#email_fail_retry { color: red; }
+        label#email_label { margin-top: 20px !important; display: inline-block; }
+        #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { display: none !important; }
+
+        #forgotPassword {
+            display: inline-block !important;
+            color: #2e71ca;
+            font-size: 14px;
+            margin: 10px 0;
+            text-decoration: underline;
+        }
+
+        /* --- TOGGLE BUTTON STYLES --- */
+        .hidden-ui { display: none !important; }
+
+        .custom-btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-reset {
+            width: 100% !important;
+            padding: 14px !important;
+            background-color: #2e71ca !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+        }
+
+        .btn-outline {
+            width: 100% !important;
+            padding: 14px !important;
+            background-color: transparent !important;
+            color: #2e71ca !important;
+            border: 1px solid #2e71ca !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            margin-top: 10px !important;
+        }
+
+        /* Minimal Loader CSS */
+        #custom-loader {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8);
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
         }
         .spinner {
-            width: 40px; height: 40px; border: 4px solid #f3f3f3;
-            border-top: 4px solid #2e71ca; border-radius: 50%;
+            width: 40px; height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2e71ca;
+            border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* --- VISIBILITY CONTROL --- */
-        .hidden-ui { display: none !important; }
-        #api { display: none; }
-        #api.show-api { display: block !important; }
-
-        .custom-btn-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-        .btn-outline { background-color: transparent !important; color: #2e71ca !important; border: 1px solid #2e71ca !important; }
     </style>
 
     <script>
-        // Check Session Flag immediately
-        var journeyStarted = sessionStorage.getItem('abo_journey_active') === 'true';
+    (function() {
+        // Use sessionStorage to prevent buttons from reappearing on refresh
+        let journeyStarted = sessionStorage.getItem('abo_journey_started') === 'true';
+        let userHasClickedSignIn = false;
 
-        function updateVisibility() {
-            var apiDiv = document.getElementById('api');
-            var customButtons = document.getElementById('custom-action-container');
-            var loader = document.getElementById('loader-overlay');
-            if (!apiDiv || !customButtons) return;
+        function runUnifiedUI() {
+            const api = document.getElementById('api');
+            const loader = document.getElementById('custom-loader');
+            if (!api) return;
 
-            var emailInput = document.getElementById('email');
-            var passwordInput = document.getElementById('password');
-            var apiHasContent = apiDiv.innerHTML.trim().length > 10;
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            const forgotLink = document.getElementById('forgotPassword');
+            const continueBtn = document.getElementById('next') || document.getElementById('continue');
+            
+            const emailContainer = emailField ? (emailField.closest('li') || emailField.parentElement) : null;
+            const passwordContainer = passwordField ? (passwordField.closest('li') || passwordField.parentElement) : null;
 
-            // 1. REFRESH & JOURNEY PROTECTION
-            // If journey flag is active, we NEVER show buttons again
-            if (journeyStarted) {
-                customButtons.classList.add('hidden-ui');
-                apiDiv.classList.add('show-api');
-                
-                // Hide loader once B2C content actually renders
-                if (apiHasContent) {
+            const isLoginScreen = !!(emailField && passwordField);
+
+            // 1. Logic for Initial Buttons (only on Login Screen and if journey not started)
+            if (isLoginScreen && !journeyStarted && !userHasClickedSignIn) {
+                if (emailContainer) emailContainer.classList.add('hidden-ui');
+                if (passwordContainer) passwordContainer.classList.add('hidden-ui');
+                if (continueBtn) continueBtn.classList.add('hidden-ui');
+
+                let customBox = document.getElementById('custom-action-container');
+                if (!customBox) {
+                    customBox = document.createElement('div');
+                    customBox.id = 'custom-action-container';
+                    customBox.className = 'custom-btn-container';
+                    customBox.innerHTML = `
+                        <button type="button" class="btn-reset" id="act-reset">Reset My Password</button>
+                        <button type="button" class="btn-outline" id="act-signin">Sign In with Existing Credentials</button>
+                    `;
+                    api.appendChild(customBox);
+
+                    document.getElementById('act-reset').onclick = function() {
+                        sessionStorage.setItem('abo_journey_started', 'true');
+                        journeyStarted = true;
+                        if (loader) loader.style.display = 'flex';
+                        
+                        // Single click logic: Poll until B2C forgot link is available, then click it
+                        let attempts = 0;
+                        const pollForgot = setInterval(() => {
+                            const link = document.getElementById('forgotPassword');
+                            if (link) {
+                                clearInterval(pollForgot);
+                                link.click();
+                            }
+                            if (++attempts > 50) { // Timeout after 5 seconds
+                                clearInterval(pollForgot);
+                                if (loader) loader.style.display = 'none';
+                            }
+                        }, 100);
+                    };
+
+                    document.getElementById('act-signin').onclick = function() {
+                        sessionStorage.setItem('abo_journey_started', 'true');
+                        journeyStarted = true;
+                        userHasClickedSignIn = true;
+                        if (customBox) customBox.remove();
+                        runUnifiedUI(); 
+                    };
+                }
+            } 
+            else {
+                // Remove custom buttons if they exist
+                const customBox = document.getElementById('custom-action-container');
+                if (customBox) customBox.remove();
+
+                // Show original fields
+                if (emailContainer) emailContainer.classList.remove('hidden-ui');
+                if (passwordContainer) passwordContainer.classList.remove('hidden-ui');
+
+                // Special handling for the Continue button
+                if (continueBtn) {
+                    const isVerificationPage = (emailField && !passwordField);
+                    const successMsg = document.getElementById('email_success');
+                    
+                    if (isVerificationPage) {
+                        const isVerified = !!(successMsg && successMsg.offsetParent !== null);
+                        // Hide during verification, show on success
+                        continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
+                    } else {
+                        continueBtn.classList.remove('hidden-ui');
+                        continueBtn.style.setProperty('display', 'block', 'important');
+                    }
+                }
+
+                // Hide loader if the B2C content is visible
+                if (loader && api.innerHTML.trim().length > 0) {
                     loader.style.display = 'none';
                 }
-            } else {
-                // Initial Landing Logic
-                customButtons.classList.remove('hidden-ui');
-                apiDiv.classList.remove('show-api');
-                loader.style.display = 'none';
-            }
-
-            // 2. CONTINUE BUTTON LOGIC (for MFA/Verification)
-            var continueBtn = document.getElementById('continue') || document.getElementById('next');
-            if (continueBtn && !passwordInput) {
-                var verificationControl = document.querySelector('.verificationControlLayout') || document.getElementById('email_ver_control');
-                var successMsg = document.getElementById('email_success');
-                var isVerifying = !!(verificationControl && (verificationControl.offsetWidth > 0));
-                var isVerified = !!(successMsg && (successMsg.offsetWidth > 0));
-
-                if (isVerifying && !isVerified) {
-                    continueBtn.style.setProperty('display', 'none', 'important');
-                } else {
-                    continueBtn.style.setProperty('display', 'block', 'important');
-                }
             }
         }
 
-        function handleResetClick() {
-            // Set flag + show loader
-            sessionStorage.setItem('abo_journey_active', 'true');
-            journeyStarted = true;
-            document.getElementById('loader-overlay').style.display = 'flex';
-            
-            // Poll for the forgotPassword link
-            var pollCount = 0;
-            var poll = setInterval(function() {
-                var forgot = document.getElementById('forgotPassword');
-                pollCount++;
-                if (forgot) {
-                    forgot.click();
-                    clearInterval(poll);
-                    updateVisibility();
-                } else if (pollCount > 30) { // Timeout after 6s
-                    clearInterval(poll);
-                    updateVisibility(); 
-                }
-            }, 200);
+        const observer = new MutationObserver(runUnifiedUI);
+        const target = document.getElementById('api');
+        if (target) {
+            observer.observe(target, { childList: true, subtree: true, attributes: true });
         }
 
-        function handleSignInClick() {
-            sessionStorage.setItem('abo_journey_active', 'true');
-            journeyStarted = true;
-            document.getElementById('loader-overlay').style.display = 'flex';
-            updateVisibility();
-            
-            // Artificial delay for smoother UX if API loads too fast
-            setTimeout(updateVisibility, 500);
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            // Check state on load (Fixes the refresh issue)
-            if (sessionStorage.getItem('abo_journey_active') === 'true') {
-                document.getElementById('loader-overlay').style.display = 'flex';
-            }
-            
-            updateVisibility();
-            
-            var observer = new MutationObserver(updateVisibility);
-            observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-            setInterval(updateVisibility, 500);
-        });
+        setInterval(runUnifiedUI, 500);
+        runUnifiedUI();
+    })();
     </script>
 </head>
 <body>
     <div class="master-card">
-        <!-- Loading Spinner Overlay -->
-        <div id="loader-overlay" class="loader-overlay">
+        <!-- Loader element -->
+        <div id="custom-loader">
             <div class="spinner"></div>
         </div>
-
         <div class="logo-container">
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
-
-        <!-- Custom Landing UI -->
-        <div id="custom-action-container" class="custom-btn-container">
-            <button class="btn-reset" onclick="handleResetClick()">Reset My Password</button>
-            <button class="btn-outline" onclick="handleSignInClick()">Sign In with Existing Credentials</button>
-        </div>
-
         <div id="api"></div>
     </div>
 </body>
