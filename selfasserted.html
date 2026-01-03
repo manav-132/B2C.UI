@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- ALL YOUR ORIGINAL CSS KEPT AS IS --- */
+        /* --- ORIGINAL CSS PRESERVED --- */
         body {
             background-color: #f8f9fa;
             font-family: 'Open Sans', sans-serif;
@@ -25,16 +25,17 @@
             border: 1px solid #e1e4e8;
             box-sizing: border-box;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            position: relative; /* Added for loader positioning */
+            position: relative;
         }
-        .heading, .h1 { display: none; }
-        .intro p { display: none !important; }
-        h2 { font-size: 1rem !important; font-weight: 400 !important; }
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
 
-        h1, .heading h1 { font-size: 26px !important; font-weight: 700 !important; margin-bottom: 15px !important; }
+        /* Hiding B2C clutter (Intro text, original headings, and original links) */
+        .heading, .h1, .intro, .intro p, #forgotPassword { 
+            display: none !important; 
+        }
 
+        h2 { font-size: 1rem !important; font-weight: 400 !important; }
         ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
         li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
         
@@ -58,23 +59,16 @@
             margin-top: 15px !important;
             cursor: pointer !important;
         }
+
+        /* Verification Message Styles */
         div#verifying_blurb, div#claimVerificationServerError { display: none !important; }
         .error.itemLevel.show, .error.itemLevel { color: red; }
         .error.pageLevel { color: red; margin-bottom: 10px !important; }
-        .hide-button { display: none !important; }
         div#email_fail_retry { color: red; }
         label#email_label { margin-top: 20px !important; display: inline-block; }
         #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny { display: none !important; }
-
-        #forgotPassword {
-            display: inline-block !important;
-            color: #2e71ca;
-            font-size: 14px;
-            margin: 10px 0;
-            text-decoration: underline;
-        }
-
-        /* --- TOGGLE BUTTON STYLES --- */
+        
+        /* --- CUSTOM UI STYLES --- */
         .hidden-ui { display: none !important; }
 
         .custom-btn-container {
@@ -84,38 +78,21 @@
             margin-top: 20px;
         }
 
-        .btn-reset {
-            width: 100% !important;
-            padding: 14px !important;
-            background-color: #2e71ca !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            cursor: pointer !important;
-        }
-
         .btn-outline {
-            width: 100% !important;
-            padding: 14px !important;
             background-color: transparent !important;
             color: #2e71ca !important;
             border: 1px solid #2e71ca !important;
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            cursor: pointer !important;
             margin-top: 10px !important;
         }
 
-        /* Minimal Loader CSS */
+        /* Loader Overlay */
         #custom-loader {
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.8);
-            z-index: 10;
-            justify-content: center;
-            align-items: center;
+            background: rgba(255,255,255,0.9);
+            z-index: 100;
+            justify-content: center; align-items: center;
             border-radius: 12px;
         }
         .spinner {
@@ -130,9 +107,8 @@
 
     <script>
     (function() {
-        // Use sessionStorage to prevent buttons from reappearing on refresh
+        // Track journey state in sessionStorage to survive refreshes
         let journeyStarted = sessionStorage.getItem('abo_journey_started') === 'true';
-        let userHasClickedSignIn = false;
 
         function runUnifiedUI() {
             const api = document.getElementById('api');
@@ -141,111 +117,116 @@
 
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
-            const forgotLink = document.getElementById('forgotPassword');
             const continueBtn = document.getElementById('next') || document.getElementById('continue');
-            
-            const emailContainer = emailField ? (emailField.closest('li') || emailField.parentElement) : null;
-            const passwordContainer = passwordField ? (passwordField.closest('li') || passwordField.parentElement) : null;
+            const b2cEntryItems = document.querySelectorAll('.entry-item, .attrEntry, .verificationControlLayout');
 
+            // Identify the Login Screen (presence of both email and password)
             const isLoginScreen = !!(emailField && passwordField);
 
-            // 1. Logic for Initial Buttons (only on Login Screen and if journey not started)
-            if (isLoginScreen && !journeyStarted && !userHasClickedSignIn) {
-                if (emailContainer) emailContainer.classList.add('hidden-ui');
-                if (passwordContainer) passwordContainer.classList.add('hidden-ui');
+            // 1. CASE: INITIAL LANDING SCREEN
+            if (isLoginScreen && !journeyStarted) {
+                // Hide original B2C elements
+                b2cEntryItems.forEach(item => item.classList.add('hidden-ui'));
                 if (continueBtn) continueBtn.classList.add('hidden-ui');
 
+                // Create and show custom landing buttons
                 let customBox = document.getElementById('custom-action-container');
                 if (!customBox) {
                     customBox = document.createElement('div');
                     customBox.id = 'custom-action-container';
                     customBox.className = 'custom-btn-container';
                     customBox.innerHTML = `
-                        <button type="button" class="btn-reset" id="act-reset">Reset My Password</button>
+                        <button type="button" id="act-reset">Reset My Password</button>
                         <button type="button" class="btn-outline" id="act-signin">Sign In with Existing Credentials</button>
                     `;
                     api.appendChild(customBox);
 
+                    // --- RESET PASSWORD LOGIC ---
                     document.getElementById('act-reset').onclick = function() {
                         sessionStorage.setItem('abo_journey_started', 'true');
                         journeyStarted = true;
                         if (loader) loader.style.display = 'flex';
                         
-                        // Single click logic: Poll until B2C forgot link is available, then click it
+                        // Poll for the hidden B2C "Forgot your password?" link and click it
                         let attempts = 0;
-                        const pollForgot = setInterval(() => {
-                            const link = document.getElementById('forgotPassword');
-                            if (link) {
-                                clearInterval(pollForgot);
-                                link.click();
+                        const pollInterval = setInterval(() => {
+                            const hiddenLink = document.getElementById('forgotPassword');
+                            if (hiddenLink) {
+                                clearInterval(pollInterval);
+                                hiddenLink.click();
                             }
-                            if (++attempts > 50) { // Timeout after 5 seconds
-                                clearInterval(pollForgot);
-                                if (loader) loader.style.display = 'none';
-                            }
-                        }, 100);
+                            if (++attempts > 50) clearInterval(pollInterval); // Timeout after 7.5s
+                        }, 150);
                     };
 
+                    // --- SIGN IN LOGIC ---
                     document.getElementById('act-signin').onclick = function() {
                         sessionStorage.setItem('abo_journey_started', 'true');
                         journeyStarted = true;
-                        userHasClickedSignIn = true;
-                        if (customBox) customBox.remove();
-                        runUnifiedUI(); 
+                        customBox.remove();
+                        runUnifiedUI(); // Immediate refresh to show fields
                     };
                 }
             } 
+            // 2. CASE: JOURNEY IN PROGRESS (User clicked button or refreshed during flow)
             else {
-                // Remove custom buttons if they exist
+                // Remove custom buttons
                 const customBox = document.getElementById('custom-action-container');
                 if (customBox) customBox.remove();
 
-                // Show original fields
-                if (emailContainer) emailContainer.classList.remove('hidden-ui');
-                if (passwordContainer) passwordContainer.classList.remove('hidden-ui');
+                // Reveal original B2C fields
+                b2cEntryItems.forEach(item => item.classList.remove('hidden-ui'));
 
-                // Special handling for the Continue button
+                // Handle Continue/Sign-in Button Visibility
                 if (continueBtn) {
-                    const isVerificationPage = (emailField && !passwordField);
+                    const isVerificationScreen = (emailField && !passwordField);
                     const successMsg = document.getElementById('email_success');
                     
-                    if (isVerificationPage) {
+                    if (isVerificationScreen) {
+                        // On email verification pages, only show "Continue" once verified
                         const isVerified = !!(successMsg && successMsg.offsetParent !== null);
-                        // Hide during verification, show on success
                         continueBtn.style.setProperty('display', isVerified ? 'block' : 'none', 'important');
                     } else {
+                        // On password entry or password reset pages, show it
                         continueBtn.classList.remove('hidden-ui');
                         continueBtn.style.setProperty('display', 'block', 'important');
                     }
                 }
 
-                // Hide loader if the B2C content is visible
-                if (loader && api.innerHTML.trim().length > 0) {
+                // Hide loader once the new B2C screen content renders
+                if (loader && api.innerText.trim().length > 10) {
                     loader.style.display = 'none';
                 }
             }
         }
 
+        // MutationObserver to watch for Azure B2C's dynamic HTML changes
         const observer = new MutationObserver(runUnifiedUI);
         const target = document.getElementById('api');
         if (target) {
             observer.observe(target, { childList: true, subtree: true, attributes: true });
         }
 
+        // Safety backup for edge cases
         setInterval(runUnifiedUI, 500);
+
+        // Initial execution
         runUnifiedUI();
     })();
     </script>
 </head>
 <body>
     <div class="master-card">
-        <!-- Loader element -->
+        <!-- Loader Spinner Overlay -->
         <div id="custom-loader">
             <div class="spinner"></div>
         </div>
+
         <div class="logo-container">
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
+
+        <!-- B2C dynamic content container -->
         <div id="api"></div>
     </div>
 </body>
