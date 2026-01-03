@@ -8,26 +8,33 @@
     <style>
         /* --- LAYOUT & CARD --- */
         body { background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .master-card { background-color: #ffffff; width: 100%; max-width: 460px; padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .master-card { background-color: #ffffff; width: 100%; max-width: 460px; padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
         .logo-container { text-align: center; margin-bottom: 30px; }
         .logo-container img { max-width: 220px; height: auto; }
         
-        /* Always hide standard B2C clutter */
+        /* Hide B2C clutter */
         .heading, .h1, .intro p, #email_ver_but_edit, .changeClaims, #cancel, a.helpLink.tiny, div#verifying_blurb, div#claimVerificationServerError { display: none !important; }
-        
-        h2 { font-size: 1rem !important; font-weight: 400 !important; }
-        ul { padding: 0 !important; margin: 0 !important; list-style: none !important; }
-        li { list-style: none !important; margin: 0 !important; padding: 0 !important; }
         
         input { width: 100% !important; padding: 12px !important; border: 1.5px solid #333 !important; border-radius: 8px !important; box-sizing: border-box !important; margin-top: 5px; }
         button { width: 100% !important; padding: 14px !important; background-color: #2e71ca !important; color: white !important; border: none !important; border-radius: 8px !important; font-weight: 600 !important; margin-top: 15px !important; cursor: pointer !important; }
 
         #forgotPassword { display: none !important; }
 
+        /* --- LOADING SPINNER --- */
+        .loader-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9); display: none;
+            justify-content: center; align-items: center; z-index: 100;
+        }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid #f3f3f3;
+            border-top: 4px solid #2e71ca; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         /* --- VISIBILITY CONTROL --- */
         .hidden-ui { display: none !important; }
-        
-        /* API hidden until needed */
         #api { display: none; }
         #api.show-api { display: block !important; }
 
@@ -36,46 +43,43 @@
     </style>
 
     <script>
+        // Check Session Flag immediately
+        var journeyStarted = sessionStorage.getItem('abo_journey_active') === 'true';
+
         function updateVisibility() {
             var apiDiv = document.getElementById('api');
             var customButtons = document.getElementById('custom-action-container');
+            var loader = document.getElementById('loader-overlay');
             if (!apiDiv || !customButtons) return;
 
             var emailInput = document.getElementById('email');
             var passwordInput = document.getElementById('password');
-            
-            // 1. Detect Journey State
-            var journeyStarted = sessionStorage.getItem('abo_journey_started') === 'true';
-            var isApiEmpty = apiDiv.innerHTML.trim() === "";
-            
-            // 2. Detect "Reset Mode" (Email field exists, but Password field is GONE)
-            // This is the key to preventing buttons on refresh during reset.
-            var isResetJourney = !!(emailInput && !passwordInput);
+            var apiHasContent = apiDiv.innerHTML.trim().length > 10;
 
-            // 3. DECISION LOGIC
-            if (isResetJourney || journeyStarted) {
-                // If we are in any secondary screen or user clicked a button, hide custom UI
+            // 1. REFRESH & JOURNEY PROTECTION
+            // If journey flag is active, we NEVER show buttons again
+            if (journeyStarted) {
                 customButtons.classList.add('hidden-ui');
                 apiDiv.classList.add('show-api');
-            } 
-            else if (isApiEmpty || (emailInput && passwordInput)) {
-                // We are on the very first landing screen
+                
+                // Hide loader once B2C content actually renders
+                if (apiHasContent) {
+                    loader.style.display = 'none';
+                }
+            } else {
+                // Initial Landing Logic
                 customButtons.classList.remove('hidden-ui');
                 apiDiv.classList.remove('show-api');
-            } 
-            else {
-                // Safety: Fallback for any other screen type
-                customButtons.classList.add('hidden-ui');
-                apiDiv.classList.add('show-api');
+                loader.style.display = 'none';
             }
 
-            // 4. Handle "Continue" button on verification screens
+            // 2. CONTINUE BUTTON LOGIC (for MFA/Verification)
             var continueBtn = document.getElementById('continue') || document.getElementById('next');
             if (continueBtn && !passwordInput) {
                 var verificationControl = document.querySelector('.verificationControlLayout') || document.getElementById('email_ver_control');
                 var successMsg = document.getElementById('email_success');
-                var isVerifying = verificationControl && (verificationControl.offsetWidth > 0 || verificationControl.offsetHeight > 0);
-                var isVerified = successMsg && (successMsg.offsetWidth > 0 || successMsg.offsetHeight > 0);
+                var isVerifying = !!(verificationControl && (verificationControl.offsetWidth > 0));
+                var isVerified = !!(successMsg && (successMsg.offsetWidth > 0));
 
                 if (isVerifying && !isVerified) {
                     continueBtn.style.setProperty('display', 'none', 'important');
@@ -85,50 +89,64 @@
             }
         }
 
-        // --- NEW RESET HANDLER (Fixes Double Click) ---
         function handleResetClick() {
-            sessionStorage.setItem('abo_journey_started', 'true');
+            // Set flag + show loader
+            sessionStorage.setItem('abo_journey_active', 'true');
+            journeyStarted = true;
+            document.getElementById('loader-overlay').style.display = 'flex';
             
-            // Force UI to show API immediately
-            document.getElementById('custom-action-container').classList.add('hidden-ui');
-            document.getElementById('api').classList.add('show-api');
-
-            // Wait/Poll for the forgotPassword link to appear and then click it
+            // Poll for the forgotPassword link
             var pollCount = 0;
-            var pollInterval = setInterval(function() {
+            var poll = setInterval(function() {
                 var forgot = document.getElementById('forgotPassword');
                 pollCount++;
-                
                 if (forgot) {
                     forgot.click();
-                    clearInterval(pollInterval);
-                } else if (pollCount > 20) { // Stop after 4 seconds
-                    clearInterval(pollInterval);
+                    clearInterval(poll);
+                    updateVisibility();
+                } else if (pollCount > 30) { // Timeout after 6s
+                    clearInterval(poll);
+                    updateVisibility(); 
                 }
             }, 200);
         }
 
         function handleSignInClick() {
-            sessionStorage.setItem('abo_journey_started', 'true');
+            sessionStorage.setItem('abo_journey_active', 'true');
+            journeyStarted = true;
+            document.getElementById('loader-overlay').style.display = 'flex';
             updateVisibility();
+            
+            // Artificial delay for smoother UX if API loads too fast
+            setTimeout(updateVisibility, 500);
         }
 
         document.addEventListener("DOMContentLoaded", function() {
+            // Check state on load (Fixes the refresh issue)
+            if (sessionStorage.getItem('abo_journey_active') === 'true') {
+                document.getElementById('loader-overlay').style.display = 'flex';
+            }
+            
             updateVisibility();
             
             var observer = new MutationObserver(updateVisibility);
             observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-            
             setInterval(updateVisibility, 500);
         });
     </script>
 </head>
 <body>
     <div class="master-card">
+        <!-- Loading Spinner Overlay -->
+        <div id="loader-overlay" class="loader-overlay">
+            <div class="spinner"></div>
+        </div>
+
         <div class="logo-container">
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
 
+        <!-- Custom Landing UI -->
         <div id="custom-action-container" class="custom-btn-container">
             <button class="btn-reset" onclick="handleResetClick()">Reset My Password</button>
             <button class="btn-outline" onclick="handleSignInClick()">Sign In with Existing Credentials</button>
