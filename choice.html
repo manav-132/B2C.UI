@@ -1,58 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>American Board of Ophthalmology</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .master-card { background-color: #ffffff; width: 100%; max-width: 460px; padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
-        .logo-container img { max-width: 250px; height: auto; margin-bottom: 30px; }
-        
-        /* 1. Hide the default B2C UI (the radio buttons and the real Continue button) */
-        #api .intro, #api .options, #api .attrEntry, #api .buttons { display: none !important; }
-        #api h1, #api h2 { display: none !important; }
-
-        /* 2. Custom Buttons styling to match your original image */
-        .custom-btn {
-            width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; transition: all 0.2s; box-sizing: border-box; display: block; text-decoration: none;
-        }
-        .btn-primary { background-color: #2e71ca; color: white; border: none; }
-        .btn-primary:hover { background-color: #245ba3; }
-        .btn-secondary { background-color: white; color: #2e71ca; border: 1.5px solid #2e71ca; }
-        .btn-secondary:hover { background-color: #f0f7ff; }
+        .logo-container img { max-width: 220px; margin-bottom: 30px; }
+        #api { display: none; } /* Hide B2C system elements */
+        .custom-btn { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; display: block; }
+        .btn-blue { background-color: #2e71ca; color: white; border: none; }
+        .btn-outline { background-color: white; color: #2e71ca; border: 1.5px solid #2e71ca; }
     </style>
 </head>
 <body>
     <div class="master-card">
-        <div class="logo-container">
-            <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
-        </div>
-        
-        <!-- Placeholder for B2C system elements -->
-        <div id="api"></div>
-
-        <!-- These are the buttons the user actually sees -->
-        <div id="custom-buttons">
-            <button class="custom-btn btn-primary" onclick="submitChoice('ResetPassword')">Reset My Password</button>
-            <button class="custom-btn btn-secondary" onclick="submitChoice('SignIn')">Sign In with Existing Credentials</button>
-        </div>
+        <div class="logo-container"><img src="https://manav-132.github.io/B2C.UI/abologo.png"></div>
+        <div id="api"></div> <!-- B2C puts radio buttons here -->
+        <button class="custom-btn btn-blue" onclick="submitChoice('ResetPassword')">Reset My Password</button>
+        <button class="custom-btn btn-outline" onclick="submitChoice('SignIn')">Sign In with Existing Credentials</button>
     </div>
-
     <script>
         function submitChoice(val) {
-            // Find the hidden radio button rendered by B2C
             var radio = document.querySelector('input[value="' + val + '"]');
-            var continueBtn = document.getElementById('continue');
-            
-            if (radio && continueBtn) {
-                radio.checked = true;
-                // Trigger the 'Continue' click to advance the journey
-                continueBtn.click();
-            } else {
-                console.error("B2C elements not yet loaded or missing.");
-            }
+            if (radio) { radio.checked = true; document.getElementById('continue').click(); }
         }
     </script>
 </body>
