@@ -1,27 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>American Board of Ophthalmology - Reset Password</title>
     <style>
         body { background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .master-card { background-color: #ffffff; width: 100%; max-width: 460px; padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .logo-container { text-align: center; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; border: 1.5px solid #333; border-radius: 8px; box-sizing: border-box; }
-        button#continue, button#next { display: none; width: 100%; padding: 14px; background-color: #2e71ca; color: white; border-radius: 8px; }
-        #api .intro, #api .helpLink { display: none; }
-        #email_ver_but_edit { display: none !important; }
+        .master-card { background-color: #ffffff; width: 100%; max-width: 450px; padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; box-shadow: 0 10px 25px rgba(0,0,0,0.05); box-sizing: border-box; }
+        .logo-container { text-align: center; margin-bottom: 25px; }
+        .logo-container img { max-width: 180px; height: auto; }
+
+        /* --- HIDE UNWANTED ELEMENTS --- */
+        #api .intro, #api .helpLink, #api #cancel, #api .buttons #cancel, #api #email_ver_but_edit { 
+            display: none !important; 
+        }
+
+        /* --- STYLE FORM ELEMENTS --- */
+        #api h2 { font-size: 20px; color: #333; margin-bottom: 15px; }
+        #api ul { list-style: none; padding: 0; margin-bottom: 15px; color: #666; font-size: 14px; }
+        #api input { width: 100%; padding: 12px; border: 1.5px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        
+        /* Verification Buttons */
+        #api button#email_ver_but_send, #api button#email_ver_but_verify { 
+            width: auto; padding: 8px 15px; margin-top: 10px; background-color: #eee; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;
+        }
+
+        /* --- THE CONTINUE BUTTON (HIDDEN BY DEFAULT) --- */
+        #api button#continue, #api button#next { 
+            display: none; width: 100%; padding: 14px; background-color: #2e71ca !important; color: white !important; 
+            border: none; border-radius: 8px; font-weight: 700; margin-top: 20px; cursor: pointer; 
+        }
     </style>
 </head>
 <body>
     <div class="master-card">
-        <div class="logo-container"><img src="https://manav-132.github.io/B2C.UI/abologo.png"></div>
+        <div class="logo-container">
+            <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
+        </div>
         <div id="api"></div>
     </div>
+
     <script>
+        // Automatic check to show the Continue button only when email is verified
         setInterval(function() {
             var successMsg = document.getElementById('email_success');
             var continueBtn = document.getElementById('continue') || document.getElementById('next');
             if (successMsg && continueBtn) {
-                // Only show Continue if the "email verified" message is visible
                 var isVerified = window.getComputedStyle(successMsg).display !== 'none';
                 continueBtn.style.display = isVerified ? 'block' : 'none';
             }
