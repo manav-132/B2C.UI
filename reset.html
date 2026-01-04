@@ -82,15 +82,27 @@ label#email_label {
     </div>
 
     <script>
-        // Systematically show the continue button only after successful verification
-        setInterval(function() {
-            var successMsg = document.getElementById('email_success');
-            var continueBtn = document.getElementById('continue') || document.getElementById('next');
-            if (successMsg && continueBtn) {
+    setInterval(function() {
+        var successMsg = document.getElementById('email_success');
+        var passwordField = document.getElementById('newPassword'); // Check for password field
+        var continueBtn = document.getElementById('continue') || document.getElementById('next');
+
+        if (continueBtn) {
+            // Logic 1: If we are on the Password Screen (newPassword exists), always show button
+            if (passwordField) {
+                continueBtn.style.setProperty('display', 'block', 'important');
+            } 
+            // Logic 2: If we are on the Verification Screen, only show if verified
+            else if (successMsg) {
                 var isVerified = window.getComputedStyle(successMsg).display !== 'none';
-                continueBtn.style.display = isVerified ? 'block' : 'none';
+                if (isVerified) {
+                    continueBtn.style.setProperty('display', 'block', 'important');
+                } else {
+                    continueBtn.style.setProperty('display', 'none', 'important');
+                }
             }
-        }, 500);
-    </script>
+        }
+    }, 500);
+</script>
 </body>
 </html>
