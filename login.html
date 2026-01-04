@@ -1,20 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>American Board of Ophthalmology - Sign In</title>
     <style>
         body { background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .master-card { background-color: #ffffff; width: 100%; max-width: 460px; padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .logo-container { text-align: center; margin-bottom: 20px; }
-        .logo-container img { max-width: 200px; }
-        /* Clean Up B2C Labels and Elements */
-        #api .intro, #api .create, #api .helpLink { display: none !important; }
-        input { width: 100%; padding: 12px; border: 1.5px solid #333; border-radius: 8px; box-sizing: border-box; margin-top: 5px; }
-        button#next { width: 100%; padding: 14px; background-color: #2e71ca; color: white; border: none; border-radius: 8px; font-weight: 600; margin-top: 15px; cursor: pointer; }
+        .master-card { background-color: #ffffff; width: 100%; max-width: 450px; padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; box-shadow: 0 10px 25px rgba(0,0,0,0.05); box-sizing: border-box; }
+        .logo-container { text-align: center; margin-bottom: 25px; }
+        .logo-container img { max-width: 180px; height: auto; }
+
+        /* --- HIDE UNWANTED ELEMENTS --- */
+        #api .intro, #api .helpLink, #api .divider, #api .create, 
+        #api .forgotPassword, #api #forgotPassword, #api .buttons #cancel, #api #cancel { 
+            display: none !important; 
+        }
+
+        /* --- STYLE INPUTS --- */
+        #api .entry-item { margin-bottom: 15px; }
+        #api label { display: block; margin-bottom: 5px; font-weight: 600; color: #333; }
+        #api input { width: 100%; padding: 12px; border: 1.5px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        #api input:focus { border-color: #2e71ca; outline: none; }
+
+        /* --- STYLE SIGN IN BUTTON --- */
+        #api button#next { 
+            width: 100%; padding: 14px; background-color: #2e71ca !important; color: white !important; 
+            border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 10px;
+        }
+        #api button#next:hover { background-color: #245ba3 !important; }
     </style>
 </head>
 <body>
     <div class="master-card">
-        <div class="logo-container"><img src="https://manav-132.github.io/B2C.UI/abologo.png"></div>
+        <div class="logo-container">
+            <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
+        </div>
         <div id="api"></div>
     </div>
 </body>
