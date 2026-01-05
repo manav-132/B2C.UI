@@ -9,13 +9,18 @@
         .custom-btn { width: 90%; padding: 14px; margin-bottom: 15px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; display: block; margin-left:1.5rem;}
         .btn-blue { background-color: #2e71ca; color: white; border: none; }
         .btn-outline { background-color: white; color: #2e71ca; border: 1.5px solid #2e71ca; }
+        p {
+    text-align: left;
+    margin-left: 2rem;
+    margin-right: 1rem;
+}
     </style>
 </head>
 <body>
     <div class="master-card">
         <div class="logo-container"><img src="https://manav-132.github.io/B2C.UI/abologo.png"></div>
         <div id="api"></div> <!-- B2C puts radio buttons here -->
-        <p>Welcome to the American Board of Ophthalmology’s enhanced Physician Dashboard. If this is your first visit to our new portal, please begin by clicking the 'Reset My Password' button to set or reset your credentials. If you have previously completed this one-time setup, you may proceed directly to the 'Sign In with existing Credentials' button to Sign in Directly</p>
+        <p>Welcome to the American Board of Ophthalmology’s enhanced Physician Dashboard. If this is your first visit to our new portal, please begin by clicking the <b>'Reset My Password'</b>button to set or reset your credentials. If you have previously completed this one-time setup, you may proceed directly to the <b>'Sign In with existing Credentials'</b> button to Sign in directly</p>
         <button class="custom-btn btn-blue" onclick="submitChoice('ResetPassword')">Reset My Password</button>
         <button class="custom-btn btn-outline" onclick="submitChoice('SignIn')">Sign In with Existing Credentials</button>
     </div>
