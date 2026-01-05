@@ -68,6 +68,21 @@ button#ForgotPasswordExchange {
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
         <div id="api"></div>
+        <button class="custom-btn btn-outline" onclick="triggerForgotPassword()">Forgot your password?</button>
     </div>
+    <script>
+    function triggerForgotPassword() {
+        // Find the hidden B2C link and click it programmatically
+        var forgotPwdLink = document.getElementById('forgotPassword');
+        if (forgotPwdLink) {
+            forgotPwdLink.click();
+        } else {
+            // Fallback: If B2C hasn't rendered the link yet, 
+            // you can tell B2C to submit the "Forgot Password" choice manually
+            // (Only works if ForgotPasswordExchange is in the ClaimsProviderSelections)
+            console.error("B2C Forgot Password link not found");
+        }
+    }
+</script>
 </body>
 </html>
