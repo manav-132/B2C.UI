@@ -109,6 +109,16 @@ label#email_label {
         var successMsg = document.getElementById('email_success');
         var passwordField = document.getElementById('newPassword'); // Check for password field
         var continueBtn = document.getElementById('continue') || document.getElementById('next');
+        var introText = document.querySelector('#api .intro');
+    
+    if (introText) {
+        // Only show this specific password help text if the password field is actually on screen
+        if (passwordField) {
+            introText.style.display = 'block';
+        } else {
+            introText.style.display = 'none';
+        }
+    }
 
         if (continueBtn) {
             // Logic 1: If we are on the Password Screen (newPassword exists), always show button
