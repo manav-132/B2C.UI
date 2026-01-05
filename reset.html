@@ -9,7 +9,7 @@
         .logo-container img { max-width: 160px; height: auto; }
 
         /* --- REMOVE SYSTEM ELEMENTS --- */
-         #api .helpLink, #api #cancel, #api .buttons #cancel, #api #email_ver_but_edit { 
+        #api .intro, #api .helpLink, #api #cancel, #api .buttons #cancel, #api #email_ver_but_edit { 
             display: none !important; 
         }
 
@@ -114,7 +114,7 @@ label#email_label {
     if (introText) {
         // Only show this specific password help text if the password field is actually on screen
         if (passwordField) {
-            introText.style.display = 'block';
+            introText.style.display = 'block !important';
         } else {
             introText.style.display = 'none';
         }
