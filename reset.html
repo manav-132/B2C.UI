@@ -127,6 +127,18 @@ label#email_label {
     </div>
 
     <script>
+        document.addEventListener('keydown', function(event) {
+        // Check if the pressed key is 'Enter' (Key code 13)
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            
+            // Optional: Only disable it for input fields so it doesn't 
+            // interfere with buttons if they are focused
+            if (event.target.tagName === 'INPUT') {
+                event.preventDefault(); // Stop the default B2C submit action
+                return false;
+            }
+        }
+    }, true);
     setInterval(function() {
         var successMsg = document.getElementById('email_success');
         var passwordField = document.getElementById('newPassword'); // Check for password field
