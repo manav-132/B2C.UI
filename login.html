@@ -83,6 +83,19 @@ button#ForgotPasswordExchange {
         </div>
         <div id="api"></div>
     </div>
-    
+    <script>
+    document.addEventListener('keydown', function(event) {
+        // Check if the pressed key is 'Enter' (Key code 13)
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            
+            // Optional: Only disable it for input fields so it doesn't 
+            // interfere with buttons if they are focused
+            if (event.target.tagName === 'INPUT') {
+                event.preventDefault(); // Stop the default B2C submit action
+                return false;
+            }
+        }
+    }, true); // The 'true' here ensures we catch the event before B2C scripts do
+</script>
 </body>
 </html>
