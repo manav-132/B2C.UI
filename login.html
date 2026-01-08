@@ -74,6 +74,17 @@ button#ForgotPasswordExchange {
 #waiting_container {
     display: none !important;
 }
+        .error.pageLevel {
+        display: block !important; /* Force visibility for testing */
+        color: red !important;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    
+    /* Ensure the error isn't hidden by your negative margin */
+    #api {
+        padding-top: 20px;
+    }
     </style>
      <script>
     document.addEventListener('keydown', function(event) {
