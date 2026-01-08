@@ -99,6 +99,31 @@ button#ForgotPasswordExchange {
             }
         }
     }, true); // The 'true' here ensures we catch the event before B2C scripts do
+         document.addEventListener("DOMContentLoaded", function () {
+    const apiDiv = document.getElementById('api');
+    if (!apiDiv) return;
+
+    const observer = new MutationObserver(function (mutations) {
+        // Target the standard B2C error div
+        const errorMsg = document.querySelector('#claimVerificationServerError');
+        const forgotBtn = document.getElementById('ForgotPasswordExchange');
+
+        if (forgotBtn && errorMsg) {
+            // Check if the error is currently visible
+            if (window.getComputedStyle(errorMsg).display !== 'none') {
+                // If error is visible, reduce the 'top' value to compensate for the error's height
+                // Default is 270px; we subtract ~40-60px depending on your error size
+                forgotBtn.style.top = "215px"; 
+            } else {
+                // Return to original position when error is gone
+                forgotBtn.style.top = "270px";
+            }
+        }
+    });
+
+    // Start observing the #api div for changes in the error message visibility
+    observer.observe(apiDiv, { attributes: true, subtree: true, attributeFilter: ['style', 'class'] });
+});
 </script>
 </head>
 <body>
