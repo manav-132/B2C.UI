@@ -132,8 +132,8 @@ label#email_label {
         <div id="api"></div>
     </div>
 
-    <script>
-        document.addEventListener('keydown', function(event) {
+   <script>
+    document.addEventListener('keydown', function(event) {
         // Check if the pressed key is 'Enter' (Key code 13)
         if (event.key === 'Enter' || event.keyCode === 13) {
             
@@ -145,21 +145,66 @@ label#email_label {
             }
         }
     }, true);
+    
+    // The main logic loop
     setInterval(function() {
         var successMsg = document.getElementById('email_success');
-        var passwordField = document.getElementById('newPassword'); // Check for password field
+        var passwordField = document.getElementById('newPassword'); 
         var continueBtn = document.getElementById('continue') || document.getElementById('next');
         var introText = document.querySelector('#api .intro');
-    
-    if (introText) {
-        // Only show this specific password help text if the password field is actually on screen
-        if (passwordField) {
-            introText.style.display = 'block';
-        } else {
-            introText.style.display = 'none';
-        }
-    }
+        var systemCancelBtn = document.getElementById('cancel');
+        
+        // 1. Check for the specific 'Account Does Not Exist' error text
+        // Using a unique part of the error message: "not currently associated with an ABO account"
+        var pageContent = document.getElementById('api').innerText;
+        var specificErrorPresent = pageContent.includes("not currently associated with an ABO account");
 
+        // 2. Logic for the specific error
+        if (specificErrorPresent) {
+            // Hide the continue button
+            if (continueBtn) {
+                continueBtn.style.setProperty('display', 'none', 'important');
+            }
+            
+            // Show and style the cancel button to replace the continue button
+            if (systemCancelBtn) {
+                systemCancelBtn.textContent = 'Cancel'; // Ensure text is "Cancel"
+                // Override the CSS hiding rule and apply styling
+                systemCancelBtn.style.cssText = `
+                    width: 90%;
+                    padding: 10px 20px;
+                    background-color: #f44336 !important; /* A red color for cancellation */
+                    color: white !important;
+                    border: none;
+                    border-radius: 8px;
+                    font-weight: 700;
+                    margin-top: 25px;
+                    cursor: pointer;
+                    margin-left: 2.4rem;
+                    margin-right: 1rem;
+                    display: block !important; /* CRITICAL: Override the display: none !important from CSS */
+                `;
+            }
+            // Stop processing the rest of the original logic
+            return;
+        }
+
+        // 3. If no specific error, ensure the cancel button is hidden (default state)
+        if (systemCancelBtn) {
+            systemCancelBtn.style.setProperty('display', 'none', 'important');
+        }
+        
+        // 4. Existing logic for intro text
+        if (introText) {
+            // Only show this specific password help text if the password field is actually on screen
+            if (passwordField) {
+                introText.style.display = 'block';
+            } else {
+                introText.style.display = 'none';
+            }
+        }
+
+        // 5. Existing logic for continue button
         if (continueBtn) {
             // Logic 1: If we are on the Password Screen (newPassword exists), always show button
             if (passwordField) {
@@ -173,6 +218,9 @@ label#email_label {
                 } else {
                     continueBtn.style.setProperty('display', 'none', 'important');
                 }
+            } else {
+                // Ensure it's hidden if not on password screen or not verified
+                continueBtn.style.setProperty('display', 'none', 'important');
             }
         }
     }, 500);
