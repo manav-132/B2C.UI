@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -78,50 +77,65 @@
 }
         #api button#email_ver_but_send:hover { background-color: #e2e8f0; }
 
-        /* --- THEME CONTINUE BUTTON --- */
+        /* --- THEME CONTINUE BUTTON (Modified for 100% width) --- */
         #api button#continue, #api button#next {
-    display: none;
-    width: 90%;
-    padding: 10px 20px;
-    background-color: #ff7424 !important;
-    color: white !important;
-    border: none;
-    border-radius: 8px;
-    font-weight: 700;
-    margin-top: 25px;
-    cursor: pointer;
-    margin-left: 2.4rem;
-    margin-right: 1rem;
-}
+            display: none;
+            width: 100% !important; /* Set to 100% */
+            padding: 10px 20px;
+            background-color: #ff7424 !important;
+            color: white !important;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-top: 25px;
+            cursor: pointer;
+            margin-left: 0 !important; /* Remove margin for 100% width */
+            margin-right: 0 !important;
+        }
+        
+        /* --- STYLE FOR THE NEW EMBEDDED CANCEL BUTTON --- */
+        #externalCancelButton {
+            background-color: white;
+            color: #ff7424; /* Primary theme color for text */
+            border: 1px solid #ff7424;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            width:100%; /* Match Send button width */
+            margin-top: 10px;
+        }
+
         h1 {
-    display:none;
-}
+            display:none;
+        }
 
-ul {
-    list-style-type: none;
-}
+        ul {
+            list-style-type: none;
+        }
 
-form#attributeVerification {
-    margin-right:2rem !important;
-}
-.error.itemLevel {
-    color: red;
-}
+        form#attributeVerification {
+            margin-right:2rem !important;
+        }
+        .error.itemLevel {
+            color: red;
+        }
 
-label#email_label {
-    margin-top:1rem
-}
+        label#email_label {
+            margin-top:1rem
+        }
         #verifying_blurb, 
-.verifying-modal, 
-#simplemodal-overlay, 
-#simplemodal-container {
-    display: none !important;
-}
+        .verifying-modal, 
+        #simplemodal-overlay, 
+        #simplemodal-container {
+            display: none !important;
+        }
 
-/* Optional: Prevent a 'flicker' of unstyled text by ensuring the body is clean */
-#waiting_container {
-    display: none !important;
-}
+        /* Optional: Prevent a 'flicker' of unstyled text by ensuring the body is clean */
+        #waiting_container {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -130,7 +144,12 @@ label#email_label {
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
         <div id="api"></div>
-        <a href="https://sfuat.abop.org/physician/s/"> <button>Cancel</button> </a>
+        
+        <!-- NEW CANCEL BUTTON BLOCK WITH ID - Target of the JS -->
+        <a href="https://sfuat.abop.org/physician/s/" id="externalCancelLink" style="display:none; text-decoration: none;"> 
+            <button id="externalCancelButton" type="button">Cancel</button> 
+        </a>
+        
     </div>
 
    <script>
@@ -153,51 +172,77 @@ label#email_label {
         var passwordField = document.getElementById('newPassword'); 
         var continueBtn = document.getElementById('continue') || document.getElementById('next');
         var introText = document.querySelector('#api .intro');
+        
+        // B2C System Cancel Button (used for the specific error state)
         var systemCancelBtn = document.getElementById('email_ver_but_edit');
+        // Custom Cancel Link (used for the initial screen)
+        var externalCancelLink = document.getElementById('externalCancelLink'); 
+        var externalCancelButton = document.getElementById('externalCancelButton'); 
         
         // 1. Check for the specific 'Account Does Not Exist' error text
-        // Using a unique part of the error message: "not currently associated with an ABO account"
         var pageContent = document.getElementById('api').innerText;
         var specificErrorPresent = pageContent.includes("not currently associated with an ABO account");
 
-        // 2. Logic for the specific error
+        // --- State 1: Specific Error (User Not Found) ---
         if (specificErrorPresent) {
             // Hide the continue button
             if (continueBtn) {
                 continueBtn.style.setProperty('display', 'none', 'important');
             }
             
-            // Show and style the cancel button to replace the continue button
+            // Hide the custom external cancel link
+            if (externalCancelLink) {
+                externalCancelLink.style.display = 'none';
+            }
+            
+            // Show and style the B2C system cancel button for the error state
             if (systemCancelBtn) {
-                systemCancelBtn.textContent = 'Cancel'; // Ensure text is "Cancel"
-                // Override the CSS hiding rule and apply styling
+                systemCancelBtn.textContent = 'Contact Support / Cancel'; // Adjust text if needed
                 systemCancelBtn.style.cssText = `
                     width: 100%;
                     padding: 10px 20px;
-                    background-color: #ff7424 !important; /* A red color for cancellation */
+                    background-color: #f44336 !important; /* Use a distinct red color for error exit */
                     color: white !important;
                     border: none;
                     border-radius: 8px;
                     font-weight: 700;
                     margin-top: 25px;
                     cursor: pointer;
-                    margin-left: 0rem;
-                    margin-right: 0rem;
-                    display: block !important; /* CRITICAL: Override the display: none !important from CSS */
+                    display: block !important;
                 `;
             }
-            // Stop processing the rest of the original logic
-            return;
+            return; // Stop processing other states
         }
-
-        // 3. If no specific error, ensure the cancel button is hidden (default state)
+        
+        // --- State 2: Initial Email Screen (The one in the image) ---
+        // It is the initial screen if passwordField is null AND no success msg is shown 
+        var isInitialEmailScreen = !passwordField && (!successMsg || window.getComputedStyle(successMsg).display === 'none');
+        
+        if (isInitialEmailScreen) {
+            // Show the custom external cancel link
+            if (externalCancelLink) {
+                externalCancelLink.style.display = 'block';
+            }
+            // Ensure the button text is just "Cancel"
+            if (externalCancelButton) {
+                externalCancelButton.textContent = 'Cancel';
+            }
+        } else {
+            // Hide the custom external cancel link on all other screens (code entry, password set, etc.)
+            if (externalCancelLink) {
+                externalCancelLink.style.display = 'none';
+            }
+        }
+        
+        // --- State 3: Normal Flow Clean-up & Continue Logic ---
+        
+        // Ensure the B2C system cancel button is hidden in all non-error normal states
         if (systemCancelBtn) {
             systemCancelBtn.style.setProperty('display', 'none', 'important');
         }
         
-        // 4. Existing logic for intro text
+        // Existing logic for intro text
         if (introText) {
-            // Only show this specific password help text if the password field is actually on screen
             if (passwordField) {
                 introText.style.display = 'block';
             } else {
@@ -205,14 +250,11 @@ label#email_label {
             }
         }
 
-        // 5. Existing logic for continue button
+        // Existing logic for continue button
         if (continueBtn) {
-            // Logic 1: If we are on the Password Screen (newPassword exists), always show button
             if (passwordField) {
                 continueBtn.style.setProperty('display', 'block', 'important');
-            } 
-            // Logic 2: If we are on the Verification Screen, only show if verified
-            else if (successMsg) {
+            } else if (successMsg) {
                 var isVerified = window.getComputedStyle(successMsg).display !== 'none';
                 if (isVerified) {
                     continueBtn.style.setProperty('display', 'block', 'important');
@@ -220,7 +262,6 @@ label#email_label {
                     continueBtn.style.setProperty('display', 'none', 'important');
                 }
             } else {
-                // Ensure it's hidden if not on password screen or not verified
                 continueBtn.style.setProperty('display', 'none', 'important');
             }
         }
