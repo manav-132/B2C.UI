@@ -80,7 +80,7 @@
         /* --- THEME CONTINUE BUTTON (Modified for 100% width) --- */
         #api button#continue, #api button#next {
             display: none;
-            width: 100% !important; /* Set to 100% */
+            width: 90% !important; /* Set to 100% */
             padding: 10px 20px;
             background-color: #ff7424 !important;
             color: white !important;
@@ -95,8 +95,8 @@
         
         /* --- STYLE FOR THE NEW EMBEDDED CANCEL BUTTON --- */
         #externalCancelButton {
-            background-color: white;
-            color: #ff7424; /* Primary theme color for text */
+            background-color: #ff7424;
+            color: white; /* Primary theme color for text */
             border: 1px solid #ff7424;
             padding: 10px 20px;
             border-radius: 6px;
@@ -198,11 +198,10 @@
             
             // Show and style the B2C system cancel button for the error state
             if (systemCancelBtn) {
-                systemCancelBtn.textContent = 'Contact Support / Cancel'; 
                 systemCancelBtn.style.cssText = `
                     width: 100%;
                     padding: 10px 20px;
-                    background-color: #f44336 !important; /* Use a distinct red color for error exit */
+                    background-color: #ff7424 !important; /* Use a distinct red color for error exit */
                     color: white !important;
                     border: none;
                     border-radius: 8px;
@@ -227,8 +226,8 @@
             if (externalCancelButton) {
                 externalCancelButton.textContent = 'Cancel';
                 // Reset to the secondary style (white background, orange border/text)
-                externalCancelButton.style.backgroundColor = 'white';
-                externalCancelButton.style.color = '#ff7424';
+                externalCancelButton.style.backgroundColor = '#ff7424';
+                externalCancelButton.style.color = 'white';
                 externalCancelButton.style.borderColor = '#ff7424';
             }
         } else {
