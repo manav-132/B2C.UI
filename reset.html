@@ -179,8 +179,9 @@
         var externalCancelLink = document.getElementById('externalCancelLink'); 
         var externalCancelButton = document.getElementById('externalCancelButton'); 
         
-        // 1. Check for the specific 'Account Does Not Exist' error text
         var pageContent = document.getElementById('api').innerText;
+
+        // 1. Check for the specific 'Account Does Not Exist' error text
         var specificErrorPresent = pageContent.includes("not currently associated with an ABO account");
 
         // --- State 1: Specific Error (User Not Found) ---
@@ -197,7 +198,7 @@
             
             // Show and style the B2C system cancel button for the error state
             if (systemCancelBtn) {
-                systemCancelBtn.textContent = 'Contact Support / Cancel'; // Adjust text if needed
+                systemCancelBtn.textContent = 'Contact Support / Cancel'; 
                 systemCancelBtn.style.cssText = `
                     width: 100%;
                     padding: 10px 20px;
@@ -214,21 +215,24 @@
             return; // Stop processing other states
         }
         
-        // --- State 2: Initial Email Screen (The one in the image) ---
-        // It is the initial screen if passwordField is null AND no success msg is shown 
-        var isInitialEmailScreen = !passwordField && (!successMsg || window.getComputedStyle(successMsg).display === 'none');
+        // --- State 2: Strictly Initial Email Screen (Check for the intro text) ---
+        var isInitialEmailScreen = pageContent.includes("Enter the email address currently associated with your ABO account");
         
         if (isInitialEmailScreen) {
-            // Show the custom external cancel link
+            // SHOW on the initial screen
             if (externalCancelLink) {
                 externalCancelLink.style.display = 'block';
             }
-            // Ensure the button text is just "Cancel"
+            // Ensure the button text is just "Cancel" and use the correct styling
             if (externalCancelButton) {
                 externalCancelButton.textContent = 'Cancel';
+                // Reset to the secondary style (white background, orange border/text)
+                externalCancelButton.style.backgroundColor = 'white';
+                externalCancelButton.style.color = '#ff7424';
+                externalCancelButton.style.borderColor = '#ff7424';
             }
         } else {
-            // Hide the custom external cancel link on all other screens (code entry, password set, etc.)
+            // HIDE on all other screens (Code Entry, Password Set, etc.)
             if (externalCancelLink) {
                 externalCancelLink.style.display = 'none';
             }
