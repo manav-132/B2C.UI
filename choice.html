@@ -49,7 +49,20 @@
         <button class="custom-btn btn-outline" onclick="submitChoice('SignIn')">Sign in with existing credentials</button>
     </div>
     <script>
+        const REFRESH_TIME = 18 * 60 * 1000; // 18 Minutes
+        const PORTAL_URL = "https://www.abop.org/physician/s"; 
+
+        // 2. START THE TIMER (Saved to a variable so we can stop it later)
+        var autoRefreshTimer = setTimeout(function() {
+            console.log("Session timed out on selection screen. Reloading...");
+            window.top.location.replace(PORTAL_URL);
+        }, REFRESH_TIME);
+        
         function submitChoice(val) {
+            if (autoRefreshTimer) {
+                clearTimeout(autoRefreshTimer);
+                console.log("User made a selection. Timer stopped.");
+            }    
             var radio = document.querySelector('input[value="' + val + '"]');
             if (radio) { radio.checked = true; document.getElementById('continue').click(); }
         }
