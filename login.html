@@ -4,7 +4,7 @@
     <title>American Board of Ophthalmology</title>
     <link rel="icon" type="image/png" href="https://manav-132.github.io/B2C.UI/abologo.png">
     <style>
-        /* Your Existing CSS */
+        /* 1. Core Layout */
         body { 
             background-color: #f8f9fa; 
             font-family: 'Open Sans', sans-serif; 
@@ -15,6 +15,7 @@
             margin: 0; 
         }
 
+        /* 2. The Card */
         .master-card { 
             background-color: #ffffff; 
             width: 100%; 
@@ -33,6 +34,7 @@
 
         h2 { display:none !important; }
 
+        /* 3. The Forgot Password Button */
         button#ForgotPasswordExchange {
             position: absolute;
             bottom: 40px;
@@ -49,6 +51,7 @@
             cursor: pointer;
         }
 
+        /* 4. Error Messages */
         #api .error.pageLevel {
             display: block !important;
             color: red !important;
@@ -59,6 +62,7 @@
 
         .error.itemLevel { color: red; font-size: 13px; }
 
+        /* 5. Clean up B2C Default Elements */
         #api .forgotPassword, #api #forgotPassword, #api .helpLink, 
         #api .divider, #api .create, #api #cancel, #api .buttons #cancel { 
             display: none !important; 
@@ -78,21 +82,10 @@
             border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer;
         }
 
+        /* Prevent flicker */
         #verifying_blurb, .verifying-modal, #waiting_container { display: none !important; }
-        
-        /* New CSS for the timeout message */
-        #timeout-message {
-            display: none;
-            text-align: center;
-            color: #721c24;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
+
     </style>
-    
     <script>
         // 1. Enter Key Blocker (Your existing code)
         document.addEventListener('keydown', function(event) {
@@ -104,33 +97,26 @@
             }
         }, true);
 
-        // 2. NEW CODE: Session Timeout Handler
-        // Set timeout duration in milliseconds (e.g., 15 minutes = 900000ms)
-        // We set it slightly lower than the Salesforce timeout to be safe.
-        const SESSION_TIMEOUT = 15 * 60 * 1000; 
+        // ---------------------------------------------------------
+        // 2. NEW CODE: Silent Auto-Redirect
+        // ---------------------------------------------------------
+        
+        // Time: 18 Minutes (in milliseconds). 
+        // This is safely BEFORE the Salesforce 20-minute timeout.
+        const REFRESH_TIME = 1 * 60 * 1000; 
+
+        // URL: Your Salesforce Experience Site URL
+        const PORTAL_URL = "https://www.abop.org/physician/s"; 
 
         setTimeout(function() {
-            // Option A: Reload the page automatically (Might not fix it if URL params are old)
-            // window.location.reload(); 
+            // Once the timer hits 18 mins, we redirect the user.
+            // This forces a new handshake with Salesforce so the 'State' is fresh.
+            // Using 'replace' prevents the expired page from getting stuck in the Back button history.
+            window.top.location.replace(PORTAL_URL);
+            
+        }, REFRESH_TIME);
+        // ---------------------------------------------------------
 
-            // Option B: Disable the form and tell user to start over (Best UX for security)
-            var apiDiv = document.getElementById('api');
-            var timeoutDiv = document.getElementById('timeout-message');
-            
-            if(apiDiv) {
-                // Hide the login form so they can't submit expired credentials
-                apiDiv.style.display = 'none'; 
-            }
-            
-            if(timeoutDiv) {
-                timeoutDiv.style.display = 'block';
-            }
-            
-            // Hide the forgot password button too
-            var forgotBtn = document.getElementById('ForgotPasswordExchange');
-            if(forgotBtn) forgotBtn.style.display = 'none';
-
-        }, SESSION_TIMEOUT);
     </script>
 </head>
 <body>
@@ -138,16 +124,7 @@
         <div class="logo-container">
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
-        
-        <!-- B2C injects content here -->
         <div id="api"></div>
-
-        <!-- New Timeout Message -->
-        <div id="timeout-message">
-            <h3>Session Expired</h3>
-            <p>For your security, this login session has timed out due to inactivity.</p>
-            <p><a href="javascript:window.location.reload(true)" style="color:#721c24; font-weight:bold;">Click here to refresh the page</a></p>
-        </div>
     </div>
 </body>
 </html>
