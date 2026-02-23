@@ -6,63 +6,30 @@
     <style>
         /* 1. Core Layout */
         body { 
-            background-color: #f8f9fa; 
-            font-family: 'Open Sans', sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
+            background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; display: flex; 
+            justify-content: center; align-items: center; min-height: 100vh; margin: 0; 
         }
 
         /* 2. The Card */
         .master-card { 
-            background-color: #ffffff; 
-            width: 100%; 
-            max-width: 440px; 
-            padding: 40px; 
-            padding-bottom: 120px; 
-            border-radius: 12px; 
-            border: 1px solid #e1e4e8; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-            box-sizing: border-box;
-            position: relative; 
+            background-color: #ffffff; width: 100%; max-width: 440px; padding: 40px; 
+            padding-bottom: 40px; border-radius: 12px; border: 1px solid #e1e4e8; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); box-sizing: border-box; position: relative; 
         }
 
         .logo-container { text-align: center; margin-bottom: 20px; }
         .logo-container img { max-width: 160px; height: auto; }
-
         h2 { display:none !important; }
-
-        /* 3. The Forgot Password Button */
-        button#ForgotPasswordExchange {
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            right: 40px;
-            width: auto;
-            padding: 16px;
-            background-color: #ff7424 !important;
-            color: white !important;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-        }
 
         /* 4. Error Messages */
         #api .error.pageLevel {
-            display: block !important;
-            color: red !important;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 14px;
+            display: block !important; color: red !important; border-radius: 5px; 
+            font-weight: bold; font-size: 14px;
         }
-
         .error.itemLevel { color: red; font-size: 13px; }
 
         /* 5. Clean up B2C Default Elements */
+        /* IMPORTANT: We hide the default B2C forgot password link here */
         #api .forgotPassword, #api #forgotPassword, #api .helpLink, 
         #api .divider, #api .create, #api #cancel, #api .buttons #cancel { 
             display: none !important; 
@@ -84,10 +51,18 @@
 
         /* Prevent flicker */
         #verifying_blurb, .verifying-modal, #waiting_container { display: none !important; }
+        
+        /* Custom Link Style */
+        .custom-forgot-pass {
+            text-align: center; margin-top: 15px;
+        }
+        .custom-forgot-pass a {
+            color: #0070d2; text-decoration: none; font-weight: 600; cursor: pointer;
+        }
+        .custom-forgot-pass a:hover { text-decoration: underline; }
 
     </style>
     <script>
-        // 1. Enter Key Blocker (Your existing code)
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Enter' || event.keyCode === 13) {
                 if (event.target.tagName === 'INPUT') {
@@ -97,26 +72,10 @@
             }
         }, true);
 
-        // ---------------------------------------------------------
-        // 2. NEW CODE: Silent Auto-Redirect
-        // ---------------------------------------------------------
-        
-        // Time: 18 Minutes (in milliseconds). 
-        // This is safely BEFORE the Salesforce 20-minute timeout.
-        const REFRESH_TIME = 1 * 60 * 1000; 
-
-        // URL: Your Salesforce Experience Site URL
+        // Auto Redirect Timer
+        const REFRESH_TIME = 18 * 60 * 1000; 
         const PORTAL_URL = "https://www.abop.org/physician/s"; 
-
-        setTimeout(function() {
-            // Once the timer hits 18 mins, we redirect the user.
-            // This forces a new handshake with Salesforce so the 'State' is fresh.
-            // Using 'replace' prevents the expired page from getting stuck in the Back button history.
-            window.top.location.replace(PORTAL_URL);
-            
-        }, REFRESH_TIME);
-        // ---------------------------------------------------------
-
+        setTimeout(function() { window.top.location.replace(PORTAL_URL); }, REFRESH_TIME);
     </script>
 </head>
 <body>
@@ -124,7 +83,32 @@
         <div class="logo-container">
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
+        
+        <!-- B2C Injects Login Form Here -->
         <div id="api"></div>
+        
+        <!-- NEW: Custom Forgot Password Link that sits below the Login Button -->
+        <div class="custom-forgot-pass">
+            <a id="customForgotPasswordLink">Forgot your password?</a>
+        </div>
     </div>
+
+    <!-- SCRIPT TO HANDLE REDIRECT -->
+    <script>
+        // -------------------------------------------------------------------
+        // CONFIGURATION: UPDATE THESE VALUES FOR SALESFORCE
+        // -------------------------------------------------------------------
+        var salesforceClientId = 2b131803-c391-497a-8a56-31d9e2710a0e; 
+        var salesforceRedirectUri = https://sfuat.abop.org/physician/services/authcallback/Azure_AD_B2C; 
+        // -------------------------------------------------------------------
+
+        var customLink = document.getElementById("customForgotPasswordLink");
+        if (customLink) {
+            customLink.onclick = function() {
+                var resetUrl = "https://nonprodabob2c.b2clogin.com/nonprodabob2c.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_PasswordReset&client_id=" + salesforceClientId + "&nonce=defaultNonce&redirect_uri=" + salesforceRedirectUri + "&scope=openid&response_type=id_token&prompt=login";
+                window.location.href = resetUrl;
+            };
+        }
+    </script>
 </body>
 </html>
