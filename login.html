@@ -76,6 +76,21 @@
         const REFRESH_TIME = 18 * 60 * 1000; 
         const PORTAL_URL = "https://www.abop.org/physician/s"; 
         setTimeout(function() { window.top.location.replace(PORTAL_URL); }, REFRESH_TIME);
+
+        // -------------------------------------------------------------------
+        // CONFIGURATION: UPDATE THESE VALUES FOR SALESFORCE
+        // -------------------------------------------------------------------
+        var salesforceClientId = "2b131803-c391-497a-8a56-31d9e2710a0e"; 
+        var salesforceRedirectUri = "https://manav-132.github.io/B2C.UI/Success.html"; 
+        // -------------------------------------------------------------------
+
+        var customLink = document.getElementById("customForgotPasswordLink");
+        if (customLink) {
+            customLink.onclick = function() {
+                var resetUrl = "https://nonprodabob2c.b2clogin.com/nonprodabob2c.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_PasswordReset&client_id=" + salesforceClientId + "&nonce=defaultNonce&redirect_uri=" + salesforceRedirectUri + "&scope=openid&response_type=id_token&prompt=login";
+                window.location.href = resetUrl;
+            };
+        }
     </script>
 </head>
 <body>
@@ -93,22 +108,5 @@
         </div>
     </div>
 
-    <!-- SCRIPT TO HANDLE REDIRECT -->
-    <script>
-        // -------------------------------------------------------------------
-        // CONFIGURATION: UPDATE THESE VALUES FOR SALESFORCE
-        // -------------------------------------------------------------------
-        var salesforceClientId = "2b131803-c391-497a-8a56-31d9e2710a0e"; 
-        var salesforceRedirectUri = "https://manav-132.github.io/B2C.UI/Success.html"; 
-        // -------------------------------------------------------------------
-
-        var customLink = document.getElementById("customForgotPasswordLink");
-        if (customLink) {
-            customLink.onclick = function() {
-                var resetUrl = "https://nonprodabob2c.b2clogin.com/nonprodabob2c.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_PasswordReset&client_id=" + salesforceClientId + "&nonce=defaultNonce&redirect_uri=" + salesforceRedirectUri + "&scope=openid&response_type=id_token&prompt=login";
-                window.location.href = resetUrl;
-            };
-        }
-    </script>
 </body>
 </html>
