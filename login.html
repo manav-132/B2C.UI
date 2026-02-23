@@ -4,90 +4,76 @@
     <title>American Board of Ophthalmology</title>
     <link rel="icon" type="image/png" href="https://manav-132.github.io/B2C.UI/abologo.png">
     <style>
-        /* 1. Core Layout */
+        /* 1. Layout & Design */
         body { 
-            background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; display: flex; 
-            justify-content: center; align-items: center; min-height: 100vh; margin: 0; 
+            background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; 
         }
-
-        /* 2. The Card */
         .master-card { 
-            background-color: #ffffff; width: 100%; max-width: 440px; padding: 40px; 
-            padding-bottom: 40px; border-radius: 12px; border: 1px solid #e1e4e8; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); box-sizing: border-box; position: relative; 
+            background-color: #ffffff; width: 100%; max-width: 440px; 
+            padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; 
         }
-
         .logo-container { text-align: center; margin-bottom: 20px; }
         .logo-container img { max-width: 160px; height: auto; }
+        
+        /* 2. HIDE THE BROKEN DEFAULT LINK */
+        /* This hides the link shown in your screenshot */
+        #forgotPassword { display: none !important; }
+        .forgotPassword { display: none !important; }
+        
+        /* Hide other default elements */
+        #api .helpLink, #api .divider, #api .create, #api #cancel { display: none !important; }
         h2 { display:none !important; }
 
-        /* 4. Error Messages */
-        #api .error.pageLevel {
-            display: block !important; color: red !important; border-radius: 5px; 
-            font-weight: bold; font-size: 14px;
-        }
-        .error.itemLevel { color: red; font-size: 13px; }
-
-        /* 5. Clean up B2C Default Elements */
-        /* IMPORTANT: We hide the default B2C forgot password link here */
-        #api .forgotPassword, #api #forgotPassword, #api .helpLink, 
-        #api .divider, #api .create, #api #cancel, #api .buttons #cancel { 
-            display: none !important; 
-        }
-
-        #api h1 { font-size: 28px; font-weight: 700; margin-bottom: 25px; color: #000; }
-        .entry-item { margin-bottom: 20px; }
-        #api label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px; }
+        /* 3. Style the Input Fields & Button to match your screenshot */
         #api input { 
-            width: 100%; padding: 14px; border: 1px solid #cbd5e0; border-radius: 8px; 
-            box-sizing: border-box; font-size: 16px; 
+            width: 100%; padding: 14px; border: 1px solid #cbd5e0; 
+            border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 15px;
         }
-        #api input:focus { border-color: #ff7424; outline: none; }
-
         #api button#next { 
-            width: 100%; padding: 16px; background-color: #ff7424 !important; color: white !important; 
-            border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer;
+            width: 100%; padding: 16px; background-color: #ff7424 !important; 
+            color: white !important; border: none; border-radius: 8px; 
+            font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 10px;
         }
 
-        /* Prevent flicker */
-        #verifying_blurb, .verifying-modal, #waiting_container { display: none !important; }
-        
-        /* Custom Link Style */
+        /* 4. Style our NEW Custom Link */
         .custom-forgot-pass {
-            text-align: center; margin-top: 15px;
+            text-align: center; 
+            margin-top: 20px;
         }
         .custom-forgot-pass a {
-            color: #0070d2; text-decoration: none; font-weight: 600; cursor: pointer;
+            color: #0067b8; /* Microsoft Blue to match your screenshot */
+            text-decoration: none; 
+            font-weight: 600; 
+            cursor: pointer;
+            font-size: 14px;
         }
         .custom-forgot-pass a:hover { text-decoration: underline; }
-
+        
+        /* Error Message Styling */
+        .error.pageLevel { color: red; font-weight: bold; }
+        .error.itemLevel { color: red; }
     </style>
-    <script>
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter' || event.keyCode === 13) {
-                if (event.target.tagName === 'INPUT') {
-                    event.preventDefault();
-                    return false;
-                }
-            }
-        }, true);
-
-        // Auto Redirect Timer
-        const REFRESH_TIME = 18 * 60 * 1000; 
-        const PORTAL_URL = "https://www.abop.org/physician/s"; 
-        setTimeout(function() { window.top.location.replace(PORTAL_URL); }, REFRESH_TIME);
-
+      <script>
         // -------------------------------------------------------------------
-        // CONFIGURATION: UPDATE THESE VALUES FOR SALESFORCE
+        // CONFIGURATION
         // -------------------------------------------------------------------
         var salesforceClientId = "2b131803-c391-497a-8a56-31d9e2710a0e"; 
-        var salesforceRedirectUri = "https://manav-132.github.io/B2C.UI/Success.html"; 
+        
+        // IMPORTANT: Use the SUCCESS page, not Salesforce directly
+        var resetRedirectUri = "https://manav-132.github.io/B2C.UI/Success.html"; 
         // -------------------------------------------------------------------
 
-        var customLink = document.getElementById("customForgotPasswordLink");
+        // 6. JavaScript to Trigger the Redirect
+        var customLink = document.getElementById("customResetLink");
         if (customLink) {
             customLink.onclick = function() {
-                var resetUrl = "https://nonprodabob2c.b2clogin.com/nonprodabob2c.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_PasswordReset&client_id=" + salesforceClientId + "&nonce=defaultNonce&redirect_uri=" + salesforceRedirectUri + "&scope=openid&response_type=id_token&prompt=login";
+                // Build the URL to the Separate Password Reset Policy
+                var resetUrl = "https://nonprodabob2c.b2clogin.com/nonprodabob2c.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_PasswordReset&client_id=" + salesforceClientId + "&nonce=defaultNonce&redirect_uri=" + resetRedirectUri + "&scope=openid&response_type=id_token&prompt=login";
+                
+                // Force the browser to go there
                 window.location.href = resetUrl;
             };
         }
@@ -99,14 +85,16 @@
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
         
-        <!-- B2C Injects Login Form Here -->
+        <!-- B2C Injects Login Form Here (Username/Password/Button) -->
         <div id="api"></div>
         
-        <!-- NEW: Custom Forgot Password Link that sits below the Login Button -->
+        <!-- 5. THE WORKING LINK -->
+        <!-- This replaces the hidden default link -->
         <div class="custom-forgot-pass">
-            <a id="customForgotPasswordLink">Forgot your password?</a>
+            <a id="customResetLink">Forgot your password?</a>
         </div>
     </div>
 
+  
 </body>
 </html>
