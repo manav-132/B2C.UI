@@ -19,7 +19,6 @@
         .logo-container img { max-width: 160px; height: auto; }
         
         /* 2. HIDE THE BROKEN DEFAULT LINK */
-        /* This hides the link shown in your screenshot */
         #forgotPassword { display: none !important; }
         .forgotPassword { display: none !important; }
         
@@ -27,7 +26,7 @@
         #api .helpLink, #api .divider, #api .create, #api #cancel { display: none !important; }
         h2 { display:none !important; }
 
-        /* 3. Style the Input Fields & Button to match your screenshot */
+        /* 3. Style Input Fields & Button */
         #api input { 
             width: 100%; padding: 14px; border: 1px solid #cbd5e0; 
             border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 15px;
@@ -44,7 +43,7 @@
             margin-top: 20px;
         }
         .custom-forgot-pass a {
-            color: #0067b8; /* Microsoft Blue to match your screenshot */
+            color: #0067b8; /* Microsoft Blue */
             text-decoration: none; 
             font-weight: 600; 
             cursor: pointer;
@@ -56,26 +55,21 @@
         .error.pageLevel { color: red; font-weight: bold; }
         .error.itemLevel { color: red; }
     </style>
-      <script>
-        // -------------------------------------------------------------------
+    <script>
         // CONFIGURATION
-        // -------------------------------------------------------------------
         var salesforceClientId = "2b131803-c391-497a-8a56-31d9e2710a0e"; 
         
-        // IMPORTANT: Use the SUCCESS page, not Salesforce directly
+        // IMPORTANT: Ensure this matches the file name on GitHub exactly (Case Sensitive!)
+        // If your file is "success.html", make sure this is lowercase.
         var resetRedirectUri = "https://manav-132.github.io/B2C.UI/Success.html"; 
-        // -------------------------------------------------------------------
 
-        // 6. JavaScript to Trigger the Redirect
-        var customLink = document.getElementById("customResetLink");
-        if (customLink) {
-            customLink.onclick = function() {
-                // Build the URL to the Separate Password Reset Policy
-                var resetUrl = "https://nonprodabob2c.b2clogin.com/nonprodabob2c.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_PasswordReset&client_id=" + salesforceClientId + "&nonce=defaultNonce&redirect_uri=" + resetRedirectUri + "&scope=openid&response_type=id_token&prompt=login";
-                
-                // Force the browser to go there
-                window.location.href = resetUrl;
-            };
+        // THE FUNCTION TRIGGERED BY ONCLICK
+        function triggerReset() {
+            console.log("Redirecting to Password Reset Policy...");
+            
+            var resetUrl = "https://nonprodabob2c.b2clogin.com/nonprodabob2c.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_PasswordReset&client_id=" + salesforceClientId + "&nonce=defaultNonce&redirect_uri=" + resetRedirectUri + "&scope=openid&response_type=id_token&prompt=login";
+            
+            window.location.href = resetUrl;
         }
     </script>
 </head>
@@ -85,16 +79,17 @@
             <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
         
-        <!-- B2C Injects Login Form Here (Username/Password/Button) -->
+        <!-- B2C Injects Login Form Here -->
         <div id="api"></div>
         
-        <!-- 5. THE WORKING LINK -->
-        <!-- This replaces the hidden default link -->
+        <!-- 5. THE WORKING LINK (With onclick event added) -->
         <div class="custom-forgot-pass">
-            <a id="customResetLink">Forgot your password?</a>
+            <!-- I added onclick="triggerReset()" here -->
+            <a id="customResetLink" onclick="triggerReset()">Forgot your password?</a>
         </div>
     </div>
 
-  
+    <!-- 6. SCRIPT MOVED TO BOTTOM (So variables load correctly) -->
+    
 </body>
 </html>
