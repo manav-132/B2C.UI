@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure AD B2C Custom OTP & Tracking Documentation</title>
+    <style>
+        :root {
+            --primary-color: #005A9C;
+            --secondary-color: #f4f7f6;
+            --text-color: #333;
+            --code-bg: #282c34;
+            --code-color: #abb2bf;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .toc {
+            background: var(--secondary-color);
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 2rem;
+        }
+
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .toc ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-color);
+            padding: 1.5rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+        }
+
+        code {
+            background-color: #eee;
+            color: #d63384;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .note {
+            background-color: #e7f3fe;
+            border-left: 6px solid #2196F3;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        table, th, td {
+            border: 1px solid var(--border-color);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Azure AD B2C Custom OTP & Tracking Documentation</h1>
+    <p>Integration architecture for Salesforce Experience Cloud using Azure Communication Services (ACS)</p>
+</header>
+
+<div class="container">
+    <div class="toc">
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#background">1. Background & Limitations</a></li>
+            <li><a href="#architecture">2. Architecture Overview</a></li>
+            <li><a href="#cost">3. Cost Analysis</a></li>
+            <li><a href="#implementation">4. Step-by-Step Implementation</a>
+                <ul>
+                    <li><a href="#step1">Step 4.1: The Azure Function (REST API)</a></li>
+                    <li><a href="#step2">Step 4.2: Azure AD B2C Custom Policy (XML)</a></li>
+                </ul>
+            </li>
+            <li><a href="#tracking">5. Enabling Tracking & Log Analytics</a></li>
+        </ul>
+    </div>
+
+    <section id="background">
+        <h2>1. Background & Limitations</h2>
+        <p>Currently, the identity provider for the Salesforce Experience Cloud site is <strong>Azure AD B2C</strong>. By default, Azure AD B2C uses Microsoft's shared internal servers (e.g., <code>msonlineservicesteam@microsoftonline.com</code>) to send One-Time Passcode (OTP) verification emails.</p>
+        <div class="note">
+            <strong>The Problem:</strong> The default Microsoft email infrastructure acts as a "black box." It is impossible to retrieve delivery logs, bounce rates, or spam filter rejections for these emails. If a user fails to receive an OTP, administrators have no way to troubleshoot.
+        </div>
+        <p>To enable detailed delivery tracking, we must bypass the standard emails and route B2C verification codes through a custom REST API using <strong>Azure Communication Services (ACS)</strong>.</p>
+    </section>
+
+    <section id="architecture">
+        <h2>2. Architecture Overview</h2>
+        <p>Because Salesforce acts only as the Relying Party (waiting for the login to complete), 100% of this implementation resides within the Azure ecosystem. No Salesforce API limits are consumed.</p>
+        <ol>
+            <li><strong>Trigger:</strong> User attempts to log into the Salesforce Experience Site and is redirected to Azure AD B2C.</li>
+            <li><strong>OTP Generation:</strong> Azure AD B2C generates the verification code.</li>
+            <li><strong>API Callout:</strong> B2C Custom Policies (XML) make a RESTful POST request containing the User's Email and the Code to an <strong>Azure Function</strong>.</li>
+            <li><strong>Email Dispatch:</strong> The Azure Function utilizes the <strong>Azure Communication Services (ACS) SDK</strong> to send the email.</li>
+            <li><strong>Log Tracking:</strong> ACS automatically pushes the delivery status (Delivered, Bounced, Failed) to an <strong>Azure Log Analytics Workspace</strong>.</li>
+            <li><strong>Completion:</strong> The user enters the code into B2C, is authenticated, and redirected back to Salesforce successfully.</li>
+        </ol>
+    </section>
+
+    <section id="cost">
+        <h2>3. Cost Analysis</h2>
+        <p>This serverless architecture is highly cost-effective and utilizes Azure's Pay-As-You-Go pricing model.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Purpose</th>
+                    <th>Estimated Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Azure Functions</strong></td>
+                    <td>Hosts the custom REST API</td>
+                    <td><strong>~$0.00</strong> (First 1 Million executions per month are FREE on the Consumption plan)</td>
+                </tr>
+                <tr>
+                    <td><strong>Azure Communication Services</strong></td>
+                    <td>Sends the actual emails</td>
+                    <td><strong>~$0.00025 per email</strong> (e.g., $2.50 for 10,000 emails)</td>
+                </tr>
+                <tr>
+                    <td><strong>Azure Log Analytics</strong></td>
+                    <td>Stores the delivery logs</td>
+                    <td><strong>~$2.00 - $3.00 per GB</strong> (Email logs are tiny text files; expected cost is pennies per month)</td>
+                </tr>
+                <tr>
+                    <td><strong>Salesforce</strong></td>
+                    <td>Experience Cloud Host</td>
+                    <td><strong>$0.00</strong> (No Salesforce resources/API calls are used for this process)</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="implementation">
+        <h2>4. Step-by-Step Implementation</h2>
+        
+        <h3 id="step1">Step 4.1: The Azure Function (REST API)</h3>
+        <p>Create an Azure Function (Node.js) on a Consumption Plan. This acts as the middleman between B2C and ACS. We use the official Azure ACS Email SDK instead of raw SMTP for better reliability and performance.</p>
+        <pre><code>const { EmailClient } = require("@azure/communication-email");
+
+module.exports = async function (context, req) {
+    // 1. Grab the email and code sent by Azure AD B2C
+    const userEmail = req.body.email;
+    const otpCode = req.body.verificationCode;
+
+    // 2. Connect to your ACS Resource via Connection String
+    const connectionString = process.env.ACS_CONNECTION_STRING;
+    const emailClient = new EmailClient(connectionString);
+
+    // 3. Construct the email payload
+    const message = {
+        senderAddress: "DoNotReply@yourdomain.com",
+        content: {
+            subject: "Your Salesforce Login Code",
+            plainText: `Your verification code is: ${otpCode}`,
+        },
+        recipients: {
+            to: [{ address: userEmail }],
+        },
+    };
+
+    try {
+        // 4. Send the email and wait for completion
+        const poller = await emailClient.beginSend(message);
+        await poller.pollUntilDone();
+        
+        // Return 200 OK back to B2C
+        context.res = { status: 200, body: "Email sent successfully" };
+    } catch (error) {
+        // Return 409 Conflict if failed (B2C requires 409 for custom error handling)
+        context.res = { status: 409, body: { userMessage: "Failed to send verification email." } };
+    }
+};</code></pre>
+
+        <h3 id="step2">Step 4.2: Azure AD B2C Custom Policy (XML)</h3>
+        <p>Update your B2C Custom Policy (specifically <code>TrustFrameworkExtensions.xml</code>) to include the RESTful Technical Profile. Replace the <code>ServiceUrl</code> with your published Azure Function URL.</p>
+        <pre><code>&lt;TechnicalProfile Id="SendVerificationEmail"&gt;
+  &lt;DisplayName&gt;Send email via ACS API&lt;/DisplayName&gt;
+  &lt;Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.RestfulProvider, Web.TPEngine" /&gt;
+  &lt;Metadata&gt;
+    &lt;!-- The URL of the Azure Function created in Step 4.1 --&gt;
+    &lt;Item Key="ServiceUrl"&gt;https://my-b2c-email-api.azurewebsites.net/api/SendEmail&lt;/Item&gt;
+    &lt;Item Key="SendClaimsIn"&gt;Body&lt;/Item&gt;
+    &lt;Item Key="AuthenticationType"&gt;None&lt;/Item&gt;
+    &lt;Item Key="AllowInsecureAuthInProduction"&gt;false&lt;/Item&gt;
+  &lt;/Metadata&gt;
+  &lt;InputClaims&gt;
+    &lt;!-- Payloads sent to the Node.js Req.Body --&gt;
+    &lt;InputClaim ClaimTypeReferenceId="email" /&gt;
+    &lt;InputClaim ClaimTypeReferenceId="verificationCode" /&gt;
+  &lt;/InputClaims&gt;
+  &lt;UseTechnicalProfileForSessionManagement ReferenceId="SM-Noop" /&gt;
+&lt;/TechnicalProfile&gt;</code></pre>
+        <p>Ensure this Technical Profile is referenced in your Orchestration Steps during the Sign-Up/Sign-In journey.</p>
+    </section>
+
+    <section id="tracking">
+        <h2>5. Enabling Tracking & Log Analytics</h2>
+        <p>The primary goal of this architecture is to retrieve delivery logs. Here is how to configure and query them.</p>
+        
+        <h3>A. Enable Diagnostic Settings</h3>
+        <ol>
+            <li>Navigate to your <strong>Email Communication Services</strong> resource in the Azure Portal.</li>
+            <li>Go to <strong>Monitoring &gt; Diagnostic settings</strong>.</li>
+            <li>Click <strong>+ Add diagnostic setting</strong>.</li>
+            <li>Check <strong>Email Service Send Mail logs</strong> and <strong>Email Service Delivery Status Update Logs</strong>.</li>
+            <li>Select <strong>Send to Log Analytics workspace</strong> and save.</li>
+        </ol>
+
+        <h3>B. Querying User Email Logs (KQL)</h3>
+        <p>If a specific user reports a missing OTP code, navigate to your Log Analytics Workspace, click <strong>Logs</strong>, and execute the following Kusto Query Language (KQL) script to find the exact drop point:</p>
+        <pre><code>ACSEmailStatusUpdateOperational
+| where RecipientId == "user@theirdomain.com"
+| project TimeGenerated, RecipientId, DeliveryStatus, DeliveryStatusDetails
+| order by TimeGenerated desc</code></pre>
+        <p><strong>Expected Statuses:</strong> <code>Delivered</code>, <code>Bounced</code>, <code>Failed</code>, <code>Suppressed</code>. The <code>DeliveryStatusDetails</code> column will contain exact SMTP error codes from the receiving mail server (e.g., Blocked by Spam Filter).</p>
+    </section>
+
+</div>
+
+</body>
+</html>
