@@ -9,64 +9,64 @@
         .custom-btn { width: 90%; padding: 14px; margin-bottom: 15px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; display: block; margin-left:1.5rem;}
         .btn-blue { background-color: #ff7424; color: white; border: none; }
         .btn-outline { background-color: white; color: #ff7424; border: 1.5px solid #ff7424; }
-        p { text-align: left; margin-left: 2rem; margin-right: 1rem; line-height: 30px; }
-        .error.itemLevel { color: red; }
-        #verifying_blurb, .verifying-modal, #simplemodal-overlay, #simplemodal-container, #waiting_container { display: none !important; }
-        div#requiredFieldMissing { color: red; margin-right: 1rem; margin-left: 1rem; }
+        p {
+    text-align: left;
+    margin-left: 2rem;
+    margin-right: 1rem;
+    line-height: 30px;
+}
+        .error.itemLevel {
+    color: red;
+}
+        #verifying_blurb, 
+.verifying-modal, 
+#simplemodal-overlay, 
+#simplemodal-container {
+    display: none !important;
+}
+
+/* Optional: Prevent a 'flicker' of unstyled text by ensuring the body is clean */
+#waiting_container {
+    display: none !important;
+}
+        div#requiredFieldMissing {
+    color: red;
+    margin-right: 1rem;
+    margin-left: 1rem;
+}
     </style>
-    <title>American Board of Ophthalmology</title>
-    <link rel="icon" type="image/png" href="https://manav-132.github.io/B2C.UI/abologo.png">
+    <title>American Board of Ophthalmology
+    </title>
+    
+        <link rel="icon" type="image/png" href="https://american-board-of-ophthalmology.github.io/B2C.UI/abologo.png">
 </head>
 <body>
     <div class="master-card">
-        <div class="logo-container"><img src="https://manav-132.github.io/B2C.UI/abologo.png"></div>
-        <div id="api"></div> <!-- B2C puts radio buttons here (Hidden) -->
-        
+        <div class="logo-container"><img src="https://american-board-of-ophthalmology.github.io/B2C.UI/abologo.png"></div>
+        <div id="api"></div> <!-- B2C puts radio buttons here -->
         <p>Welcome to the American Board of Ophthalmology’s enhanced physician portal. If this is your first visit, please begin by clicking the “Set/reset my password” button below to set or reset your credentials. If you have previously completed this one-time setup, you may proceed using the “Sign in with existing credentials” button.</p>
-        
-        <!-- These buttons trigger the JS function below -->
         <button class="custom-btn btn-blue" onclick="submitChoice('ResetPassword')">Set/reset my password</button>
         <button class="custom-btn btn-outline" onclick="submitChoice('SignIn')">Sign in with existing credentials</button>
     </div>
-
     <script>
-        // -------------------------------------------------------------------
-        // CONFIGURATION: UPDATE THESE VALUES FOR SALESFORCE
-        // -------------------------------------------------------------------
-        var salesforceClientId = "2b131803-c391-497a-8a56-31d9e2710a0e"; 
-        var salesforceRedirectUri = "https://manav-132.github.io/B2C.UI/Success.html"; 
-        // -------------------------------------------------------------------
+        const REFRESH_TIME = 10 * 60 * 1000; 
 
-        const REFRESH_TIME = 18 * 60 * 1000; // 18 Minutes
+        // URL: Your Salesforce Experience Site URL
         const PORTAL_URL = "https://www.abop.org/physician/s"; 
 
-        var autoRefreshTimer = setTimeout(function() {
-            console.log("Session timed out on selection screen. Reloading...");
-            window.top.location.replace(PORTAL_URL);
-        }, REFRESH_TIME);
+       var autoRefreshTimer = setTimeout(function() {
+        console.log("Session timed out on selection screen. Reloading...");
+        window.top.location.replace(PORTAL_URL);
+    }, REFRESH_TIME);
         
         function submitChoice(val) {
-            // Stop the timer since the user made a choice
             if (autoRefreshTimer) {
                 clearTimeout(autoRefreshTimer);
+                console.log("User made a selection. Timer stopped.");
             }
-
-            // LOGIC SPLIT:
-            if (val === 'ResetPassword') {
-                // If they want to reset, we REDIRECT them to the separate policy
-                // This prevents Salesforce from crashing
-                var resetUrl = "https://nonprodabob2c.b2clogin.com/nonprodabob2c.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_PasswordReset&client_id=" + salesforceClientId + "&nonce=defaultNonce&redirect_uri=" + salesforceRedirectUri + "&scope=openid&response_type=id_token&prompt=login";
-                
-                window.location.href = resetUrl;
-            } 
-            else {
-                // If they want to Sign In, we let B2C handle it normally
-                var radio = document.querySelector('input[value="' + val + '"]');
-                if (radio) { 
-                    radio.checked = true; 
-                    document.getElementById('continue').click(); 
-                }
-            }
+            
+            var radio = document.querySelector('input[value="' + val + '"]');
+            if (radio) { radio.checked = true; document.getElementById('continue').click(); }
         }
     </script>
 </body>
