@@ -2,94 +2,126 @@
 <html>
 <head>
     <title>American Board of Ophthalmology</title>
-    <link rel="icon" type="image/png" href="https://manav-132.github.io/B2C.UI/abologo.png">
+     <link rel="icon" type="image/png" href="https://american-board-of-ophthalmology.github.io/B2C.UI/abologo.png">
     <style>
-        /* 1. Layout & Design */
+        /* 1. Core Layout */
         body { 
-            background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; 
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; margin: 0; 
+            background-color: #f8f9fa; 
+            font-family: 'Open Sans', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
         }
+
+        /* 2. The Card - Added 'position: relative' to act as a container for absolute elements */
         .master-card { 
-            background-color: #ffffff; width: 100%; max-width: 440px; 
-            padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; 
+            background-color: #ffffff; 
+            width: 100%; 
+            max-width: 440px; 
+            padding: 40px; 
+            padding-bottom: 120px; /* Extra space at bottom for the forgot password button */
+            border-radius: 12px; 
+            border: 1px solid #e1e4e8; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            box-sizing: border-box;
+            position: relative; 
         }
+
         .logo-container { text-align: center; margin-bottom: 20px; }
         .logo-container img { max-width: 160px; height: auto; }
-        
-        /* 2. HIDE THE BROKEN DEFAULT LINK */
-        #forgotPassword { display: none !important; }
-        .forgotPassword { display: none !important; }
-        
-        /* Hide other default elements */
-        #api .helpLink, #api .divider, #api .create, #api #cancel { display: none !important; }
+
         h2 { display:none !important; }
 
-        /* 3. Style Input Fields & Button */
-        #api input { 
-            width: 100%; padding: 14px; border: 1px solid #cbd5e0; 
-            border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 15px;
-        }
-        #api button#next { 
-            width: 100%; padding: 16px; background-color: #ff7424 !important; 
-            color: white !important; border: none; border-radius: 8px; 
-            font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 10px;
+        /* 3. The Forgot Password Button - Fixed at the bottom of the card */
+        button#ForgotPasswordExchange {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            right: 40px;
+            width: auto;
+            padding: 16px;
+            background-color: #ff7424 !important;
+            color: white !important;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
         }
 
-        /* 4. Style our NEW Custom Link */
-        .custom-forgot-pass {
-            text-align: center; 
-            margin-top: 20px;
-        }
-        .custom-forgot-pass a {
-            color: #0067b8; /* Microsoft Blue */
-            text-decoration: none; 
-            font-weight: 600; 
-            cursor: pointer;
+        /* 4. Error Messages */
+        #api .error.pageLevel {
+            display: block !important;
+            color: red !important;
+            
+            border-radius: 5px;
+            
+            font-weight: bold;
             font-size: 14px;
         }
-        .custom-forgot-pass a:hover { text-decoration: underline; }
-        
-        /* Error Message Styling */
-        .error.pageLevel { color: red; font-weight: bold; }
-        .error.itemLevel { color: red; }
+
+        .error.itemLevel { color: red; font-size: 13px; }
+
+        /* 5. Clean up B2C Default Elements */
+        #api .forgotPassword, #api #forgotPassword, #api .helpLink, 
+        #api .divider, #api .create, #api #cancel, #api .buttons #cancel { 
+            display: none !important; 
+        }
+
+        #api h1 { font-size: 28px; font-weight: 700; margin-bottom: 25px; color: #000; }
+        .entry-item { margin-bottom: 20px; }
+        #api label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px; }
+        #api input { 
+            width: 100%; padding: 14px; border: 1px solid #cbd5e0; border-radius: 8px; 
+            box-sizing: border-box; font-size: 16px; 
+        }
+        #api input:focus { border-color: #ff7424; outline: none; }
+
+        #api button#next { 
+            width: 100%; padding: 16px; background-color: #ff7424 !important; color: white !important; 
+            border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer;
+        }
+
+        /* Prevent flicker */
+        #verifying_blurb, .verifying-modal, #waiting_container { display: none !important; }
+
     </style>
     <script>
-        // CONFIGURATION
-        var salesforceClientId = "2b131803-c391-497a-8a56-31d9e2710a0e"; 
+        // Removing the MutationObserver as Absolute Positioning handles the movement automatically.
+        // We only keep the Enter key block if you strictly want to prevent 'Enter' login.
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.keyCode === 13) {
+                if (event.target.tagName === 'INPUT') {
+                    event.preventDefault();
+                    return false;
+                }
+            }
+        }, true);
         
-        // IMPORTANT: Ensure this matches the file name on GitHub exactly (Case Sensitive!)
-        // If your file is "success.html", make sure this is lowercase.
-        var resetRedirectUri = "https://manav-132.github.io/B2C.UI/Success.html"; 
+        const REFRESH_TIME = 10 * 60 * 1000; 
 
-        // THE FUNCTION TRIGGERED BY ONCLICK
-        function triggerReset() {
-            console.log("Redirecting to Password Reset Policy...");
+        // URL: Your Salesforce Experience Site URL
+        const PORTAL_URL = "https://www.abop.org/physician/s"; 
+
+        setTimeout(function() {
+            // Once the timer hits 18 mins, we redirect the user.
+            // This forces a new handshake with Salesforce so the 'State' is fresh.
+            // Using 'replace' prevents the expired page from getting stuck in the Back button history.
+            window.top.location.replace(PORTAL_URL);
             
-            var resetUrl = "https://nonprodabob2c.b2clogin.com/nonprodabob2c.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_PasswordReset&client_id=" + salesforceClientId + "&nonce=defaultNonce&redirect_uri=" + resetRedirectUri + "&scope=openid&response_type=id_token&prompt=login";
-            
-            window.location.href = resetUrl;
-        }
+        }, REFRESH_TIME);
     </script>
 </head>
 <body>
     <div class="master-card">
         <div class="logo-container">
-            <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
+            <img src="https://american-board-of-ophthalmology.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
-        
-        <!-- B2C Injects Login Form Here -->
         <div id="api"></div>
-        
-        <!-- 5. THE WORKING LINK (With onclick event added) -->
-        <div class="custom-forgot-pass">
-            <!-- I added onclick="triggerReset()" here -->
-            <a id="customResetLink" onclick="triggerReset()">Forgot your password?</a>
-        </div>
     </div>
 
-    <!-- 6. SCRIPT MOVED TO BOTTOM (So variables load correctly) -->
     
 </body>
 </html>
