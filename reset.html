@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>American Board of Ophthalmology</title>
-     <link rel="icon" type="image/png" href="https://manav-132.github.io/B2C.UI/abologo.png">
+     <link rel="icon" type="image/png" href="https://american-board-of-ophthalmology.github.io/B2C.UI/abologo.png">
     <style>
         body { background-color: #f8f9fa; font-family: 'Open Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .master-card { background-color: #ffffff; width: 100%; max-width: 480px; padding: 40px; border-radius: 12px; border: 1px solid #e1e4e8; box-shadow: 0 10px 25px rgba(0,0,0,0.05); box-sizing: border-box; }
@@ -142,12 +142,12 @@
 <body>
     <div class="master-card">
         <div class="logo-container">
-            <img src="https://manav-132.github.io/B2C.UI/abologo.png" alt="ABO Logo">
+             <img src="https://american-board-of-ophthalmology.github.io/B2C.UI/abologo.png" alt="ABO Logo">
         </div>
         <div id="api"></div>
         
         <!-- NEW CANCEL BUTTON BLOCK WITH ID - Target of the JS -->
-        <a href="https://sfuat.abop.org/physician/s/" id="externalCancelLink" style="display:none; text-decoration: none;"> 
+        <a href="https://www.abop.org/physician/s/" id="externalCancelLink" style="display:none; text-decoration: none;"> 
             <button id="externalCancelButton" type="button">Cancel</button> 
         </a>
         
@@ -270,6 +270,18 @@
             }
         }
     }, 500);
+       const REFRESH_TIME = 10 * 60 * 1000; 
+
+        // URL: Your Salesforce Experience Site URL
+        const PORTAL_URL = "https://www.abop.org/physician/s"; 
+
+        setTimeout(function() {
+            // Once the timer hits 18 mins, we redirect the user.
+            // This forces a new handshake with Salesforce so the 'State' is fresh.
+            // Using 'replace' prevents the expired page from getting stuck in the Back button history.
+            window.top.location.replace(PORTAL_URL);
+            
+        }, REFRESH_TIME);
 </script>
 </body>
 </html>
